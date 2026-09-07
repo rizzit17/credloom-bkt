@@ -2,23 +2,24 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FiMenu, FiX, FiChevronDown } from "react-icons/fi";
-import { Shield } from "lucide-react";
+import { Shield, ArrowUpRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import StatusBadge from "@/components/ui/StatusBadge";
 
-const Navbar = () => {
+export default function Navbar() {
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
-  
-  // Get auth state from AuthContext
+
   const { user, role, logout } = useAuth();
   const isSignedIn = !!user;
   const userType = role;
 
   const getDashboardLink = () => {
     if (!isSignedIn) return "/signin";
-    
     switch (userType) {
       case "borrower":
         return "/borrower";
@@ -27,252 +28,220 @@ const Navbar = () => {
       case "insurer":
         return "/insurer";
       default:
-        return "/select-role";
+        return "/borrower";
     }
   };
 
-  const handleSignOut = () => {
-    logout(); // This removes the access_token from localStorage and redirects to home
-  };
+  const navLinks = [
+    { label: "Overview", href: "/" },
+    { label: "Terminal", href: getDashboardLink() },
+    { label: "Contact", href: "/contact" },
+  ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-zinc-800">
-      {/* Main Nav */}
-      <nav className="w-full flex items-center justify-between px-8 py-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center">
-            <Shield className="w-5 h-5 text-black" />
-          </div>
-          <span className="text-xl font-bold text-white tracking-tight">Credloom</span>
-        </Link>
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#0E1013]/95 backdrop-blur-none border-b border-[#2A2D33]">
+      <nav className="max-w-7xl mx-auto h-full flex items-center justify-between px-4 sm:px-6">
+        {/* Brand & Market Status */}
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-7 h-7 bg-[#14171C] border border-[#2A2D33] rounded-[4px] flex items-center justify-center">
+              <Shield className="w-3.5 h-3.5 text-[#C9A24B]" />
+            </div>
+            <span className="text-base font-semibold tracking-tight text-[#F5F3EE]">
+              CREDLOOM
+            </span>
+          </Link>
 
-        {/* Center Links - Desktop */}
-        <div className="hidden md:flex items-center space-x-8">
-          <Link
-            href="/"
-            className="text-zinc-400 text-sm font-medium transition-colors duration-300 hover:text-white"
-          >
-            Home
-          </Link>
-          <Link
-            href={getDashboardLink()}
-            className="text-zinc-400 text-sm font-medium transition-colors duration-300 hover:text-white"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/contact"
-            className="text-zinc-400 text-sm font-medium transition-colors duration-300 hover:text-white"
-          >
-            Contact Us
-          </Link>
-          
+          {/* Institutional Status Indicator */}
+          <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-[#2A2D33]">
+            <span className="w-2 h-2 rounded-full bg-[#1B7A5A] animate-pulse" />
+            <span className="text-[11px] font-mono text-[#6B7280] uppercase tracking-wider">
+              PROTOCOL ONLINE · EVM HARDHAT
+            </span>
+          </div>
         </div>
 
-        {/* Right Side - Desktop */}
-        <div className="hidden md:flex items-center gap-4">
-          {isSignedIn ? (
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 border border-zinc-800 rounded-lg">
-                <span className="text-sm text-white font-medium">
-                  {userType ? userType.charAt(0).toUpperCase() + userType.slice(1) : "User"}
-                </span>
-              </div>
-              <button 
-                onClick={handleSignOut}
-                className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+        {/* Center Navigation */}
+        <div className="hidden md:flex items-center space-x-1">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={`px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors rounded-[3px] ${
+                  isActive
+                    ? "text-[#C9A24B] bg-[#1A1D23] border border-[#2A2D33]"
+                    : "text-[#6B7280] hover:text-[#F5F3EE] hover:bg-[#14171C]"
+                }`}
               >
-                Sign Out
+                {link.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Right Action Terminal */}
+        <div className="hidden md:flex items-center gap-3">
+          {isSignedIn ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-2.5 py-1 bg-[#14171C] border border-[#2A2D33] rounded-[4px]">
+                <StatusBadge variant="signal">
+                  {userType || "ACTIVE"}
+                </StatusBadge>
+                {user?.primary_wallet && (
+                  <span className="text-xs font-mono text-[#F5F3EE]">
+                    {user.primary_wallet.slice(0, 6)}...{user.primary_wallet.slice(-4)}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={logout}
+                className="px-3 py-1 text-xs font-mono uppercase text-[#6B7280] hover:text-[#B23B3B] transition-colors border border-transparent hover:border-[#B23B3B]/40 rounded-[3px]"
+              >
+                Disconnect
               </button>
             </div>
           ) : (
-            <>
-
-              {/* Log In Button */}
+            <div className="flex items-center gap-2.5">
               <Link
                 href="/signin"
-                className="px-5 py-2.5 text-sm font-medium text-white border border-zinc-800 rounded-lg hover:border-zinc-700 hover:bg-zinc-900 transition-colors"
+                className="px-3.5 py-1.5 text-xs font-medium text-[#F5F3EE] border border-[#2A2D33] rounded-[4px] hover:border-[#6B7280] hover:bg-[#14171C] transition-colors"
               >
-                Log In
+                Sign In
               </Link>
-              {/* Sign Up Dropdown */}
-              <div 
+
+              {/* Role-based Sign Up Dropdown */}
+              <div
                 className="relative"
                 onMouseEnter={() => setIsSignUpOpen(true)}
                 onMouseLeave={() => setIsSignUpOpen(false)}
               >
-                <button
-                  className="flex items-center gap-1.5 px-6 py-2.5 text-sm font-semibold bg-white text-black rounded-lg hover:bg-zinc-200 transition-colors"
-                >
-                  Sign Up
-                  <FiChevronDown className={`transition-transform duration-300 ${isSignUpOpen ? 'rotate-180' : ''}`} />
+                <button className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-[#C9A24B] text-[#0E1013] rounded-[4px] hover:bg-[#D4B263] transition-colors">
+                  <span>Register</span>
+                  <FiChevronDown
+                    className={`transition-transform duration-200 ${
+                      isSignUpOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
-                
+
                 <AnimatePresence>
                   {isSignUpOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-56 py-2 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl"
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-1 w-56 bg-[#14171C] border border-[#2A2D33] rounded-[4px] p-1.5 z-50"
                     >
                       <Link
                         href="/signup-borrower"
-                        className="block px-4 py-3 text-sm text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
+                        className="block px-3 py-2 text-xs text-[#F5F3EE] hover:bg-[#1A1D23] rounded-[3px] transition-colors"
                       >
-                        <div className="font-medium">Sign up as Borrower</div>
-                        <div className="text-xs text-zinc-600 mt-0.5">Access micro-loans</div>
+                        <div className="font-medium flex items-center justify-between">
+                          <span>Borrower Account</span>
+                          <span className="text-[10px] font-mono text-[#1B7A5A]">TIER 1-3</span>
+                        </div>
+                        <div className="text-[11px] text-[#6B7280] mt-0.5">
+                          Under-collateralized loans
+                        </div>
                       </Link>
-                      <div className="h-px bg-zinc-800 my-1"></div>
+                      <div className="h-px bg-[#2A2D33] my-1" />
                       <Link
                         href="/signup-lender"
-                        className="block px-4 py-3 text-sm text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
+                        className="block px-3 py-2 text-xs text-[#F5F3EE] hover:bg-[#1A1D23] rounded-[3px] transition-colors"
                       >
-                        <div className="font-medium">Sign up as Lender</div>
-                        <div className="text-xs text-zinc-600 mt-0.5">Provide liquidity</div>
+                        <div className="font-medium flex items-center justify-between">
+                          <span>Lender Account</span>
+                          <span className="text-[10px] font-mono text-[#C9A24B]">YIELD</span>
+                        </div>
+                        <div className="text-[11px] text-[#6B7280] mt-0.5">
+                          Supply liquidity with policy caps
+                        </div>
                       </Link>
-                      <div className="h-px bg-zinc-800 my-1"></div>
+                      <div className="h-px bg-[#2A2D33] my-1" />
                       <Link
                         href="/signup-insurer"
-                        className="block px-4 py-3 text-sm text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
+                        className="block px-3 py-2 text-xs text-[#F5F3EE] hover:bg-[#1A1D23] rounded-[3px] transition-colors"
                       >
-                        <div className="font-medium">Sign up as Insurer</div>
-                        <div className="text-xs text-zinc-500 mt-0.5">Offer coverage</div>
+                        <div className="font-medium flex items-center justify-between">
+                          <span>Insurer Account</span>
+                          <span className="text-[10px] font-mono text-[#6B7280]">100 BPS</span>
+                        </div>
+                        <div className="text-[11px] text-[#6B7280] mt-0.5">
+                          Stake risk pool & earn fees
+                        </div>
                       </Link>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-
-              
-            </>
+            </div>
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
+        {/* Mobile Toggle */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden text-white p-2 rounded-md hover:bg-white/10 transition-all"
+          className="md:hidden text-[#6B7280] hover:text-[#F5F3EE] p-1.5 rounded-[4px] border border-[#2A2D33]"
         >
-          {isMenuOpen ? (
-            <FiX className="h-6 w-6" />
-          ) : (
-            <FiMenu className="h-6 w-6" />
-          )}
+          {isMenuOpen ? <FiX className="h-4 w-4" /> : <FiMenu className="h-4 w-4" />}
         </button>
       </nav>
 
-      {/* Mobile Nav Overlay */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center space-y-6"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-[#0E1013] border-b border-[#2A2D33] px-4 py-4 space-y-3"
           >
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-            >
+            {navLinks.map((link) => (
               <Link
-                href="/contact"
-                className="text-2xl font-medium text-white hover:text-emerald-400 transition-all"
+                key={link.label}
+                href={link.href}
+                className="block text-sm text-[#F5F3EE] py-2 border-b border-[#2A2D33]/60"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Contact Us
+                {link.label}
               </Link>
-            </motion.div>
-            
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Link
-                href={getDashboardLink()}
-                className="text-2xl font-medium text-white hover:text-emerald-400 transition-all"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-            </motion.div>
-
-            {isSignedIn ? (
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="flex flex-col items-center gap-4"
-              >
-                <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-zinc-300">
-                    {userType ? userType.charAt(0).toUpperCase() + userType.slice(1) : "User"}
-                  </span>
-                </div>
-                <button 
-                  onClick={handleSignOut}
-                  className="text-lg text-zinc-300 hover:text-white"
+            ))}
+            <div className="pt-2 flex flex-col gap-2">
+              {isSignedIn ? (
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full py-2 text-xs font-mono uppercase text-[#B23B3B] border border-[#B23B3B]/40 rounded-[4px]"
                 >
-                  Sign Out
+                  Disconnect ({userType})
                 </button>
-              </motion.div>
-            ) : (
-              <>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="flex flex-col items-center gap-3"
-                >
-                  <p className="text-sm text-zinc-400 mb-2">Sign up as:</p>
-                  <Link
-                    href="/signup-borrower"
-                    className="px-6 py-3 text-lg font-medium text-white rounded-full bg-gradient-to-r from-emerald-600 to-cyan-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Borrower
-                  </Link>
-                  <Link
-                    href="/signup-lender"
-                    className="px-6 py-3 text-lg font-medium text-white rounded-full bg-gradient-to-r from-emerald-600 to-cyan-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Lender
-                  </Link>
-                  <Link
-                    href="/signup-insurer"
-                    className="px-6 py-3 text-lg font-medium text-white rounded-full bg-gradient-to-r from-emerald-600 to-cyan-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Insurer
-                  </Link>
-                </motion.div>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
+              ) : (
+                <>
                   <Link
                     href="/signin"
-                    className="text-lg font-medium text-zinc-300 hover:text-white transition-all"
                     onClick={() => setIsMenuOpen(false)}
+                    className="w-full text-center py-2 text-xs font-mono border border-[#2A2D33] rounded-[4px]"
                   >
-                    Log In
+                    Sign In
                   </Link>
-                </motion.div>
-              </>
-            )}
+                  <Link
+                    href="/signup-borrower"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full text-center py-2 text-xs font-mono font-semibold bg-[#C9A24B] text-[#0E1013] rounded-[4px]"
+                  >
+                    Register as Borrower
+                  </Link>
+                </>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
     </header>
   );
-};
-
-export default Navbar;
+}

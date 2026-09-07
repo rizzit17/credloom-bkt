@@ -1,161 +1,112 @@
-'use client'
+'use client';
 
-import Link from "next/link";
 import React, { useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const Faqs = () => {
+export default function Faqs() {
   const faqs = [
     {
-      id: 1,
-      question: "How does Credloom protect my privacy while calculating credit scores?",
+      id: "FAQ-01",
+      question: "How does Credloom issue loans without 150% crypto collateral?",
       answer:
-        "Credloom uses zero-knowledge proofs and on-chain data analysis to generate your credit score without accessing your personal documents. Your identity is verified once through DigiLocker, but only a hash is stored—never your actual data.",
+        "Credloom replaces volatile asset over-collateralization with an algorithmic risk assessment framework. The platform evaluates the borrower's wallet identity, past loan repayment records, holding days, and verification tiers (ENS & Gitcoin Passport). Defaulting permanently flags the borrower's wallet in ReputationRegistry.sol, making defaulting economically destructive to Web3 identity.",
     },
     {
-      id: 2,
-      question: "What happens if I can't repay my loan on time?",
+      id: "FAQ-02",
+      question: "How is the dynamic APR calculated for each loan?",
       answer:
-        "If a loan isn't repaid by the deadline, your staked collateral is proportionally slashed and distributed to the lender. Your credit score will also decrease, and you'll enter a cooldown period before you can borrow again.",
+        "Interest rates are calculated dynamically using the output of a trained Gradient Boosting Regressor risk model. Borrowers with prime credit scores (750+) qualify for 5.0% to 8.0% APR. Mid-tier borrowers (650–749) receive 8.0% to 12.0%, while higher-risk scores scale up to 25.0%. Rates are locked in the smart contract escrow prior to borrower acceptance.",
     },
     {
-      id: 3,
-      question: "How are loan interest rates determined?",
+      id: "FAQ-03",
+      question: "What happens if a borrower defaults on an active loan?",
       answer:
-        "Interest rates are primarily based on your credit score, loan duration, and the amount you're borrowing. Borrowers with higher credit scores receive lower interest rates. Rates are displayed transparently before you accept any loan.",
+        "If a loan is not repaid by the deadline plus the 7-day protocol grace period, the lender or contract trigger initiates a default. The borrower's wallet is permanently blacklisted in ReputationRegistry.sol. If the lender selected insurance backing, InsurancePool.sol automatically liquidates staked capital to reimburse the lender's principal.",
     },
     {
-      id: 4,
-      question: "What is the role of insurers in Credloom?",
+      id: "FAQ-04",
+      question: "What is the role of Insurers in the protocol?",
       answer:
-        "Insurers provide default protection for lenders by offering to cover loan defaults in exchange for premium payments. This allows lenders to take on riskier borrowers while maintaining downside protection.",
+        "Insurers provide risk-underwriting liquidity by depositing into InsurancePool.sol. In exchange for absorbing unrecoverable defaults, insurers earn a 100 basis point (1%) premium fee on every insured loan disbursed across the protocol, creating a continuous yield stream.",
     },
     {
-      id: 5,
-      question: "Do I need cryptocurrency to use Credloom?",
+      id: "FAQ-05",
+      question: "How do Verification Tiers (ENS / Gitcoin Passport) affect borrowing power?",
       answer:
-        "Yes, Credloom operates on blockchain technology, so you'll need a Web3 wallet (like MetaMask) and some cryptocurrency to lock as collateral when borrowing. We support multiple tokens across various EVM-compatible chains.",
+        "Tier 1 (Basic Registration) provides initial entry limits ($500 max). Verifying an ENS domain (Tier 2) confirms established on-chain presence, lowering APR brackets and raising limits. Verifying Gitcoin Passport (Tier 3) proves unique human identity without revealing off-chain KYC, unlocking maximum loan caps and lowest tier interest rates.",
     },
   ];
 
-  const [activeId, setActiveId] = useState(1);
+  const [openId, setOpenId] = useState("FAQ-01");
 
   const toggleAccordion = (id) => {
-    setActiveId(activeId === id ? null : id);
+    setOpenId(openId === id ? null : id);
   };
 
   return (
-    <section className="relative py-24 bg-black text-white selection:bg-white selection:text-black overflow-hidden">
-      {/* Background Decor - Subtle Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
-
-      <div className="relative px-6 mx-auto max-w-7xl lg:px-8">
+    <section className="py-16 lg:py-24 bg-[#0E1013] border-b border-[#2A2D33]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20 border-b border-neutral-800 pb-12">
-          <div className="max-w-2xl">
-            <h2 className="text-4xl font-bold tracking-tighter sm:text-6xl">
-              Common <span className="text-neutral-500">Queries</span>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-8 border-b border-[#2A2D33] mb-10">
+          <div className="space-y-2">
+            <span className="text-xs font-mono text-[#6B7280]">PROTOCOL SPECIFICATIONS</span>
+            <h2 className="text-2xl sm:text-4xl font-semibold tracking-tight text-[#F5F3EE]">
+              Frequently Asked Questions
             </h2>
-            <p className="mt-6 text-lg text-neutral-400 font-light max-w-lg">
-              Understanding decentralized lending, privacy-preserving credit scoring, and blockchain-based escrow. Everything you need to know about Credloom.
-            </p>
           </div>
-          <div className="hidden md:block">
-             <div className="h-px w-24 bg-white mb-4"></div>
-             <p className="text-xs font-mono uppercase tracking-widest text-neutral-500">FAQ — 01</p>
+          <div className="text-xs font-mono text-[#6B7280]">
+            TOTAL ENTRIES: {faqs.length}
           </div>
         </div>
 
-        {/* FAQ List */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Questions Column */}
-          <div className="lg:col-span-8">
-            <div className="space-y-4">
-              {faqs.map((faq) => (
-                <div 
-                  key={faq.id} 
-                  className={`group transition-all duration-300 border-b border-neutral-800 ${activeId === faq.id ? 'pb-4' : ''}`}
+        {/* Accordion List */}
+        <div className="divide-y divide-[#2A2D33] border-y border-[#2A2D33]">
+          {faqs.map((faq) => {
+            const isOpen = openId === faq.id;
+            return (
+              <div key={faq.id} className="py-5">
+                <button
+                  onClick={() => toggleAccordion(faq.id)}
+                  className="w-full flex items-center justify-between text-left gap-4 group focus:outline-none"
                 >
-                  <button
-                    onClick={() => toggleAccordion(faq.id)}
-                    className="flex items-start justify-between w-full py-6 text-left focus:outline-none"
-                  >
-                    <div className="flex items-baseline gap-6 pr-8">
-                        <span className="text-sm font-mono text-neutral-600 group-hover:text-white transition-colors duration-300">
-                          {faq.id < 10 ? `0${faq.id}` : faq.id}
-                        </span>
-                        <span className={`text-xl font-medium tracking-tight transition-colors duration-300 ${activeId === faq.id ? 'text-white' : 'text-neutral-300 group-hover:text-white'}`}>
-                          {faq.question}
-                        </span>
-                    </div>
-                    
-                    <span className="relative flex-shrink-0 flex items-center justify-center w-8 h-8 mt-1">
-                      <motion.div
-                         animate={{ rotate: activeId === faq.id ? 45 : 0 }}
-                         transition={{ duration: 0.3, ease: "anticipate" }}
-                      >
-                         <FaPlus className={`w-5 h-5 ${activeId === faq.id ? 'text-white' : 'text-neutral-500 group-hover:text-white'}`} />
-                      </motion.div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs font-mono text-[#6B7280]">
+                      {faq.id}
                     </span>
-                  </button>
+                    <span className={`text-sm sm:text-base font-medium transition-colors ${
+                      isOpen ? "text-[#C9A24B]" : "text-[#F5F3EE] group-hover:text-[#C9A24B]"
+                    }`}>
+                      {faq.question}
+                    </span>
+                  </div>
+                  <div className="w-6 h-6 border border-[#2A2D33] bg-[#14171C] rounded-[3px] flex items-center justify-center text-[#6B7280] group-hover:text-[#F5F3EE] shrink-0">
+                    {isOpen ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                  </div>
+                </button>
 
-                  <AnimatePresence>
-                    {activeId === faq.id && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pl-12 pr-4 md:pr-12 pb-4">
-                          <p className="text-base leading-relaxed text-neutral-400 font-light">
-                            {faq.answer}
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Sticky Sidebar / CTA */}
-          <div className="lg:col-span-4 mt-8 lg:mt-0">
-            <div className="sticky top-10 p-8 rounded-2xl border border-neutral-800 bg-neutral-900/20 backdrop-blur-sm">
-               <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-6">
-                 <span className="text-2xl">🛡️</span>
-               </div>
-               <h3 className="text-2xl font-bold text-white mb-2">Still have questions?</h3>
-               <p className="text-neutral-400 mb-8 text-sm leading-6">
-                 Can&;t find the answer you&;re looking for? Our support team is available to help clarify how Credloom works for your specific needs.
-               </p>
-               
-               <Link 
-                  href="/contact" 
-                  className="group flex items-center justify-between w-full px-6 py-4 bg-white text-black rounded-lg hover:bg-neutral-200 transition-all duration-300"
-               >
-                  <span className="font-semibold">Contact Support</span>
-                  <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-               </Link>
-
-               <div className="mt-8 pt-8 border-t border-neutral-800">
-                  <p className="text-xs text-neutral-600 uppercase tracking-wider font-mono">
-                    Response time
-                  </p>
-                  <p className="text-white mt-1 font-mono text-sm">
-                    &lt; 24 Hours
-                  </p>
-               </div>
-            </div>
-          </div>
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="pt-4 pl-12 text-xs sm:text-sm text-[#6B7280] leading-relaxed max-w-3xl">
+                        {faq.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
+
       </div>
     </section>
   );
-};
-
-export default Faqs;
+}

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useState } from 'react';
 import Link from 'next/link';
 import { 
@@ -6,18 +6,21 @@ import {
   Coins,
   Clock,
   TrendingUp,
-  CheckCircle,
-  Loader2
+  CheckCircle2,
+  Loader2,
+  Sliders,
+  ShieldAlert
 } from 'lucide-react';
+import TerminalPanel from '@/components/ui/TerminalPanel';
+import TerminalButton from '@/components/ui/TerminalButton';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 export default function CreateLoanOffer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   
-  // Initialize wallet address from localStorage
   const initialWalletAddress = typeof window !== 'undefined' ? localStorage.getItem('wallet') || '' : '';
   
-  // Form state
   const [formData, setFormData] = useState({
     lenderAddress: initialWalletAddress,
     amountEth: '',
@@ -27,15 +30,12 @@ export default function CreateLoanOffer() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     setIsSubmitting(true);
 
-    // Hardcoded success - show loan configured message
     setTimeout(() => {
       setIsSubmitting(false);
       setSuccess(true);
       
-      // Reset form but keep wallet address
       const walletAddress = formData.lenderAddress;
       setFormData({
         lenderAddress: walletAddress,
@@ -44,7 +44,6 @@ export default function CreateLoanOffer() {
         minCreditScore: '650'
       });
 
-      // Auto-redirect after 3 seconds
       setTimeout(() => {
         window.location.href = '/lender';
       }, 3000);
@@ -52,138 +51,173 @@ export default function CreateLoanOffer() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-[#0E1013] text-[#F5F3EE] pt-24 pb-16 px-4 md:px-6 font-sans">
+      <div className="max-w-2xl mx-auto space-y-6">
+        
+        {/* Navigation Breadcrumb */}
         <Link
           href="/lender"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6"
+          className="inline-flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#F5F3EE] font-mono transition-colors"
         >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Dashboard
+          <ArrowLeft className="w-4 h-4" />
+          RETURN TO LENDER TERMINAL
         </Link>
 
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Create Loan Offer</h1>
-          <p className="text-gray-400">Create a new loan offer on the blockchain</p>
+        {/* Header */}
+        <div className="border-b border-[#2A2D33] pb-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-mono text-[#6B7280] tracking-wider uppercase">
+              SMART CONTRACT SPECIFICATION
+            </span>
+            <StatusBadge variant="brass" label="PARAMETER ENCODING" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#F5F3EE]">
+            Configure Liquidity Offer
+          </h1>
+          <p className="text-xs text-[#6B7280] mt-1">
+            Define automated matching constraints for incoming borrower loan requests.
+          </p>
         </div>
 
-        {/* Success Message */}
+        {/* Success Feedback */}
         {success && (
-          <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-8 mb-6 text-center">
-            <div className="mb-4">
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                <CheckCircle className="w-10 h-10 text-white" />
+          <TerminalPanel variant="signal">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-[#1B7A5A] shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-semibold text-[#1B7A5A]">
+                  Offer Contract Parameters Encoded Successfully
+                </h3>
+                <p className="text-xs text-[#6B7280] font-mono mt-1">
+                  Liquidity pool commitment committed to on-chain matching registry. Redirecting to dashboard in 3 seconds...
+                </p>
               </div>
-              <h3 className="text-3xl font-bold text-green-400 mb-2">Loan Configured! 🎉</h3>
-              <p className="text-gray-300 text-lg">
-                Your loan offer has been successfully configured.
-              </p>
             </div>
-            <p className="text-sm text-gray-400 mt-4">Redirecting to dashboard in 3 seconds...</p>
-          </div>
+          </TerminalPanel>
         )}
 
-        {/* Create Offer Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Configuration Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
           {/* Lender Address */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              Lender Address*
-            </label>
-            <input
-              type="text"
-              value={formData.lenderAddress}
-              readOnly
-              placeholder="0x..."
-              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-gray-300 font-mono cursor-not-allowed"
-              disabled
-            />
-            <p className="text-xs text-green-400 mt-2 flex items-center gap-1">
-              <CheckCircle className="w-3 h-3" />
-              Auto-filled from your logged-in wallet
-            </p>
-          </div>
-
-          {/* Loan Amount */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Coins className="w-5 h-5 text-green-400" />
-              <label className="block text-sm font-medium text-gray-400">
-                Loan Amount (ETH)*
+          <TerminalPanel title="Underwriting Account" subheader="VERIFIED WALLET IDENTITY">
+            <div className="mt-2 space-y-1.5">
+              <label className="block text-[11px] font-mono text-[#6B7280]">
+                WALLET ADDRESS (ETH)
               </label>
+              <input
+                type="text"
+                value={formData.lenderAddress}
+                readOnly
+                placeholder="0x..."
+                className="w-full px-3 py-2 bg-[#0E1013] border border-[#2A2D33] rounded-[4px] text-xs font-mono text-[#6B7280] cursor-not-allowed outline-none"
+                disabled
+              />
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#1B7A5A] pt-1">
+                <CheckCircle2 className="w-3 h-3" />
+                Session wallet validated & bound to transaction context
+              </div>
             </div>
-            <input
-              type="number"
-              step="0.01"
-              value={formData.amountEth}
-              onChange={(e) => setFormData({ ...formData, amountEth: e.target.value })}
-              placeholder="5.0"
-              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
-              disabled={isSubmitting}
-            />
-            <p className="text-xs text-gray-500 mt-2">Amount of ETH you want to lend</p>
-          </div>
+          </TerminalPanel>
 
-          {/* Duration */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-5 h-5 text-blue-400" />
-              <label className="block text-sm font-medium text-gray-400">
-                Loan Duration (Days)*
+          {/* Allocation & Tenor */}
+          <TerminalPanel title="Exposure Parameters" subheader="CAPITAL COMMITMENT & TENOR">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono text-[#6B7280]">
+                  LOAN AMOUNT (ETH)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={formData.amountEth}
+                    onChange={(e) => setFormData({ ...formData, amountEth: e.target.value })}
+                    placeholder="5.0"
+                    disabled={isSubmitting}
+                    className="w-full px-3 py-2 bg-[#0E1013] border border-[#2A2D33] focus:border-[#C9A24B] rounded-[4px] text-xs font-mono text-[#F5F3EE] outline-none transition-colors"
+                  />
+                  <span className="absolute right-3 top-2.5 text-[11px] font-mono text-[#6B7280]">
+                    ETH
+                  </span>
+                </div>
+                <p className="text-[10px] text-[#6B7280] font-mono">
+                  Principal allocated from escrow vault
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono text-[#6B7280]">
+                  DURATION (DAYS)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    required
+                    value={formData.durationDays}
+                    onChange={(e) => setFormData({ ...formData, durationDays: e.target.value })}
+                    placeholder="30"
+                    disabled={isSubmitting}
+                    className="w-full px-3 py-2 bg-[#0E1013] border border-[#2A2D33] focus:border-[#C9A24B] rounded-[4px] text-xs font-mono text-[#F5F3EE] outline-none transition-colors"
+                  />
+                  <span className="absolute right-3 top-2.5 text-[11px] font-mono text-[#6B7280]">
+                    DAYS
+                  </span>
+                </div>
+                <p className="text-[10px] text-[#6B7280] font-mono">
+                  Standard repayment window
+                </p>
+              </div>
+            </div>
+          </TerminalPanel>
+
+          {/* Risk Hurdle */}
+          <TerminalPanel title="Underwriting Hurdle" subheader="AI RISK MODEL FILTER">
+            <div className="mt-2 space-y-1.5">
+              <label className="block text-[11px] font-mono text-[#6B7280]">
+                MINIMUM CREDIT SCORE REQUIRED (300 - 850)
               </label>
+              <input
+                type="number"
+                required
+                min="300"
+                max="850"
+                value={formData.minCreditScore}
+                onChange={(e) => setFormData({ ...formData, minCreditScore: e.target.value })}
+                placeholder="650"
+                disabled={isSubmitting}
+                className="w-full px-3 py-2 bg-[#0E1013] border border-[#2A2D33] focus:border-[#C9A24B] rounded-[4px] text-xs font-mono text-[#F5F3EE] outline-none transition-colors"
+              />
+              <p className="text-[10px] text-[#6B7280] font-mono">
+                Borrowers below this score will be excluded by the autonomous escrow dispatcher.
+              </p>
             </div>
-            <input
-              type="number"
-              value={formData.durationDays}
-              onChange={(e) => setFormData({ ...formData, durationDays: e.target.value })}
-              placeholder="30"
-              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
-              disabled={isSubmitting}
-            />
-            <p className="text-xs text-gray-500 mt-2">Number of days until loan repayment</p>
-          </div>
+          </TerminalPanel>
 
-          {/* Minimum Credit Score */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-5 h-5 text-purple-400" />
-              <label className="block text-sm font-medium text-gray-400">
-                Minimum Credit Score*
-              </label>
-            </div>
-            <input
-              type="number"
-              value={formData.minCreditScore}
-              onChange={(e) => setFormData({ ...formData, minCreditScore: e.target.value })}
-              placeholder="650"
-              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
-              disabled={isSubmitting}
-              min="300"
-              max="850"
-            />
-            <p className="text-xs text-gray-500 mt-2">Minimum credit score required (300-850)</p>
-          </div>
-
-          {/* Submit Button */}
-          <button
+          {/* Submit CTA */}
+          <TerminalButton
             type="submit"
+            variant="brass"
+            size="lg"
+            fullWidth
             disabled={isSubmitting}
-            className="w-full px-6 py-4 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-6 h-6 animate-spin" />
-                Creating Offer...
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Broadcasting Offer To Registry...
               </>
             ) : (
               <>
-                <Coins className="w-6 h-6" />
-                Create Loan Offer
+                <Coins className="w-4 h-4" />
+                Deploy Loan Offer To Registry
               </>
             )}
-          </button>
+          </TerminalButton>
+
         </form>
+
       </div>
     </div>
   );

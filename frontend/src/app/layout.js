@@ -1,33 +1,39 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { AuthProvider } from '@/contexts/AuthContext';
+import SiteCursorGrid from '@/components/ui/SiteCursorGrid';
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const interSans = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata = {
-  title: "Credloom - Decentralized Micro-Lending",
-  description: "Privacy-first lending marketplace powered by AI credit scoring and blockchain escrow",
+  title: "Credloom | Autonomous Under-Collateralized Lending Terminal",
+  description: "Precision micro-lending protocol backed by AI default risk scoring and smart contract escrow settlement.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
+        className={`${interSans.variable} ${jetbrainsMono.variable} font-sans antialiased bg-[#0E1013] text-[#F5F3EE] selection:bg-[#C9A24B] selection:text-[#0E1013]`}
       >
         <AuthProvider>
           <Navbar />
-          {children}
+          <SiteCursorGrid />
+          <main className="min-h-screen pt-16">
+            {children}
+          </main>
           <Footer />
         </AuthProvider>
       </body>

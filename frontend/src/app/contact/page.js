@@ -1,143 +1,113 @@
-"use client";
-import { motion } from "framer-motion";
-import ContactForm from "./ContactForm";
-import WebcamPixelGrid from "@/components/ui/webcam-pixel-grid";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      delay: 0.3,
-      duration: 0.8,
-      ease: "easeInOut",
-      staggerChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: "easeInOut",
-    },
-  },
-};
+'use client';
+import ContactForm from './ContactForm';
+import { Mail, Phone, ShieldCheck, Clock, Activity } from 'lucide-react';
+import TerminalPanel from '@/components/ui/TerminalPanel';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 export default function ContactPage() {
   return (
-    <div className="relative w-full min-h-screen overflow-hidden">
-      {/* WebcamPixelGrid Background - Fixed position covering entire viewport */}
-      <div className="fixed inset-0 z-0">
-        <WebcamPixelGrid
-          gridCols={64}
-          gridRows={48}
-          maxElevation={20}
-          motionSensitivity={0.35}
-          elevationSmoothing={0.12}
-          colorMode="monochrome"
-          monochromeColor="#ffffff"
-          backgroundColor="#000000"
-          mirror={true}
-          gapRatio={0.08}
-          invertColors={false}
-          darken={0.7}
-          borderColor="#ffffff"
-          borderOpacity={0.06}
-        />
-      </div>
+    <div className="min-h-screen bg-[#0E1013] text-[#F5F3EE] pt-24 pb-16 px-4 md:px-6 font-sans">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Header */}
+        <div className="border-b border-[#2A2D33] pb-6">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[10px] font-mono tracking-wider text-[#9CA3AF] uppercase">
+              CREDLOOM PROTOCOL // COMMUNICATIONS DESK
+            </span>
+            <StatusBadge variant="signal" label="DESK ONLINE" />
+          </div>
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-[#F5F3EE]">
+            Protocol Inquiry & Support Desk
+          </h1>
+          <p className="text-xs text-[#9CA3AF] font-mono mt-1">
+            Institutional integrations, security vulnerability disclosures, and dispute escalation.
+          </p>
+        </div>
 
-      {/* Dark overlay for better readability */}
-      <div className="fixed inset-0 z-10 bg-black/40 backdrop-blur-[1px]" />
-
-      {/* Content Layer */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-20 w-full min-h-screen py-32 px-4 flex items-center justify-center antialiased"
-      >
-        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left Column - Text Content */}
-            <div className="space-y-8 pr-0 lg:pr-12 max-w-xl">
-              <motion.h1
-                variants={itemVariants}
-                className="text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight drop-shadow-2xl"
-              >
-                Faced any Issues?
-              </motion.h1>
-              <motion.p
-                variants={itemVariants}
-                className="text-xl text-gray-200 leading-relaxed font-medium drop-shadow-lg"
-              >
-                We are available for questions, feedback, or collaboration
-                opportunities. Let us know how we can help you achieve your goals!
-              </motion.p>
-              <motion.div
-                variants={itemVariants}
-                className="space-y-6 text-gray-200 pt-4"
-              >
-                {/* Email Contact */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: Direct Channels & Protocol Specs (5 Cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            
+            <TerminalPanel title="Direct Channels" subheader="ENCRYPTED COMMUNICATIONS">
+              <div className="space-y-3 mt-3">
                 <a
                   href="mailto:credloom@gmail.com"
-                  className="flex items-center space-x-4 group"
+                  className="p-3.5 bg-[#0A0C0E] border border-[#2A2D33] hover:border-[#C9A24B] rounded-[4px] flex items-center gap-3.5 transition-colors group block"
                 >
-                  <div className="bg-white/15 p-3 rounded-full backdrop-blur-lg transition-all duration-300 group-hover:scale-110 group-hover:bg-white/25 shadow-lg">
-                    <svg
-                      className="h-6 w-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 8l7.89 4.95a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
+                  <div className="w-9 h-9 rounded-[4px] bg-[#14171C] border border-[#2A2D33] flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-[#C9A24B]" />
                   </div>
-                  <span className="text-lg font-medium transition-colors duration-300 group-hover:text-white drop-shadow-md">
-                    credloom@gmail.com
-                  </span>
+                  <div>
+                    <span className="text-[10px] font-mono text-[#9CA3AF] block">GENERAL & INSTITUTIONAL</span>
+                    <span className="text-xs sm:text-sm font-mono font-medium text-[#F5F3EE] group-hover:text-[#C9A24B] transition-colors">
+                      credloom@gmail.com
+                    </span>
+                  </div>
                 </a>
 
-                {/* Phone Contact */}
-                <a href="tel:+919882715895" className="flex items-center space-x-4 group">
-                  <div className="bg-white/15 p-3 rounded-full backdrop-blur-lg transition-all duration-300 group-hover:scale-110 group-hover:bg-white/25 shadow-lg">
-                    <svg
-                      className="h-6 w-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                      />
-                    </svg>
+                <a
+                  href="tel:+919882715895"
+                  className="p-3.5 bg-[#0A0C0E] border border-[#2A2D33] hover:border-[#C9A24B] rounded-[4px] flex items-center gap-3.5 transition-colors group block"
+                >
+                  <div className="w-9 h-9 rounded-[4px] bg-[#14171C] border border-[#2A2D33] flex items-center justify-center shrink-0">
+                    <Phone className="w-4 h-4 text-[#1B7A5A]" />
                   </div>
-                  <span className="text-lg font-medium transition-colors duration-300 group-hover:text-white drop-shadow-md">
-                    +91 9882715895
-                  </span>
+                  <div>
+                    <span className="text-[10px] font-mono text-[#9CA3AF] block">EMERGENCY ESCALATION HOTLINE</span>
+                    <span className="text-xs sm:text-sm font-mono font-medium text-[#F5F3EE] group-hover:text-[#C9A24B] transition-colors">
+                      +91 98827 15895
+                    </span>
+                  </div>
                 </a>
-              </motion.div>
-            </div>
-            
-            {/* Right Column - Contact Form */}
-            <motion.div variants={itemVariants}>
-              <ContactForm />
-            </motion.div>
+              </div>
+            </TerminalPanel>
+
+            <TerminalPanel title="Verification & Security" subheader="SMART CONTRACT ESCALATION">
+              <div className="space-y-3 mt-2 text-xs font-mono text-[#9CA3AF]">
+                <div className="flex justify-between py-1.5 border-b border-[#2A2D33]">
+                  <span>DISPUTE ORACLE:</span>
+                  <span className="text-[#F5F3EE] font-medium">Autonomous Escrow V2</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-[#2A2D33]">
+                  <span>EXPECTED SLA:</span>
+                  <span className="text-[#1B7A5A] font-semibold">≤ 24 Hours</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-[#2A2D33]">
+                  <span>PGP ENCRYPTION:</span>
+                  <span className="text-[#C9A24B] font-medium">Available on Request</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span>DISCLOSURE POLICY:</span>
+                  <span className="text-[#F5F3EE]">Bug Bounty Eligible</span>
+                </div>
+              </div>
+            </TerminalPanel>
+
+            <TerminalPanel title="Desk Availability" subheader="OPERATING PROTOCOL">
+              <div className="space-y-2 mt-2 text-xs font-mono text-[#9CA3AF]">
+                <div className="flex items-center justify-between">
+                  <span>OPERATIONAL HOURS:</span>
+                  <span className="text-[#F5F3EE]">08:00 — 20:00 UTC</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>SMART CONTRACTS:</span>
+                  <span className="text-[#1B7A5A] font-semibold">24/7 Continuous Execution</span>
+                </div>
+              </div>
+            </TerminalPanel>
+
           </div>
+
+          {/* Right Column: Contact Transmission Form (7 Cols) */}
+          <div className="lg:col-span-7">
+            <ContactForm />
+          </div>
+
         </div>
-      </motion.div>
+
+      </div>
     </div>
   );
 }

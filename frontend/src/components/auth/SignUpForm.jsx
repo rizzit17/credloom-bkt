@@ -1,76 +1,69 @@
-"use client"
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ArrowRight, User, Lock, AlertCircle, Wallet } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { User, Lock, AlertCircle, Wallet, Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import TerminalPanel from "@/components/ui/TerminalPanel";
+import TerminalButton from "@/components/ui/TerminalButton";
+import StatusBadge from "@/components/ui/StatusBadge";
 
 export default function SignUpForm({ role, icon: Icon, title, description }) {
   const router = useRouter();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    confirmPassword: '',
-    wallet: ''
+    username: "",
+    password: "",
+    confirmPassword: "",
+    wallet: "",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
 
-  // Get role-specific information
   const getRoleInfo = () => {
     const roleInfo = {
-      'borrower': {
-        roleName: 'Borrower',
+      borrower: {
+        roleName: "Borrower",
         hasTiers: true,
-        benefits: [
-          'Access instant loans from the marketplace',
-          'AI-powered credit scoring',
-          'Flexible repayment terms',
-          'Privacy-preserving verification'
-        ],
-        tierBenefits: 'Upgrade to higher tiers for better interest rates and larger loan amounts.',
-        nextSteps: 'After registration, you\'ll start at Tier 1. Verify your ENS for Tier 2, then add Gitcoin Passport for Tier 3 to unlock better loan terms.'
+        badgeVariant: "signal",
+        badgeText: "UNSECURED CREDIT",
+        nextSteps:
+          "Upon registration, wallet activates at Tier 1 (Entry cap: $500). Verify ENS for Tier 2 ($2,500 cap), and Gitcoin Passport for Tier 3 ($5,000 max, 5.0% APR).",
       },
-      'lender': {
-        roleName: 'Lender',
+      lender: {
+        roleName: "Lender",
         hasTiers: false,
-        benefits: [
-          'Earn competitive returns on your capital',
-          'Automated loan matching system',
-          'Risk-based interest rates',
-          'Optional loan insurance protection'
-        ],
-        nextSteps: 'After registration, you can start lending immediately by configuring your lending parameters and browsing available loan opportunities.'
+        badgeVariant: "brass",
+        badgeText: "CAPITAL DEPLOYER",
+        nextSteps:
+          "Configure risk thresholds (min credit score, maximum duration, auto-lending limits) and pre-fund liquidity into autonomous smart contract escrows.",
       },
-      'insurer': {
-        roleName: 'Insurer',
+      insurer: {
+        roleName: "Insurer",
         hasTiers: false,
-        benefits: [
-          'Earn premiums by insuring loans',
-          'Automated risk assessment tools',
-          'Smart contract-based claims',
-          'Diversified premium portfolio'
-        ],
-        nextSteps: 'After registration, you can start insuring loans by setting your risk parameters and reviewing available loan insurance opportunities.'
-      }
+        badgeVariant: "neutral",
+        badgeText: "UNDERWRITING POOL",
+        nextSteps:
+          "Stake loss-absorption capital in InsurancePool.sol to underwrite protocol loans and earn continuous 100 bps yield premiums on all insured disbursals.",
+      },
     };
-    return roleInfo[role] || roleInfo['borrower'];
+    return roleInfo[role] || roleInfo["borrower"];
   };
 
   const roleInfo = getRoleInfo();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
     setApiError(null);
@@ -78,61 +71,56 @@ export default function SignUpForm({ role, icon: Icon, title, description }) {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = "Username is required";
     } else if (formData.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
+      newErrors.username = "Username must be at least 3 characters";
     }
 
     if (!formData.wallet.trim()) {
-      newErrors.wallet = 'Wallet address is required';
+      newErrors.wallet = "Wallet address is required";
     } else if (!/^0x[a-fA-F0-9]{40}$/.test(formData.wallet)) {
-      newErrors.wallet = 'Invalid Ethereum wallet address';
+      newErrors.wallet = "Invalid Ethereum wallet address (0x...)";
     }
-    
+
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "Password must be at least 8 characters";
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
+    if (!validateForm()) return;
+
     setIsLoading(true);
     setApiError(null);
-    
+
     try {
-      // All users start at Tier 1, role determines what they can do
       const result = await register({
         username: formData.username,
         password: formData.password,
         wallet: formData.wallet,
-        role: role  // Send role, not tier mapping
+        role: role,
       });
 
       if (result.success) {
-        // Show success message and redirect to sign in
-        router.push('/signin?registered=true');
+        router.push("/signin?registered=true");
       } else {
         setApiError(result.error);
       }
     } catch (error) {
-      console.error('Signup error:', error);
-      setApiError('An unexpected error occurred. Please try again.');
+      console.error("Signup error:", error);
+      setApiError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -140,53 +128,53 @@ export default function SignUpForm({ role, icon: Icon, title, description }) {
 
   const getRoleLinks = () => {
     const roles = [
-      { name: 'Borrower', path: '/signup-borrower' },
-      { name: 'Lender', path: '/signup-lender' },
-      { name: 'Insurer', path: '/signup-insurer' }
+      { name: "Borrower", path: "/signup-borrower" },
+      { name: "Lender", path: "/signup-lender" },
+      { name: "Insurer", path: "/signup-insurer" },
     ];
-    return roles.filter(r => r.name.toLowerCase() !== role);
+    return roles.filter((r) => r.name.toLowerCase() !== role);
   };
 
   return (
     <div className="w-full max-w-md">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <div className="flex items-center justify-center mb-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full blur-xl opacity-20 animate-pulse"></div>
-            
-          </div>
+      {/* Top Header */}
+      <div className="text-center mb-6 space-y-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#14171C] border border-[#2A2D33] rounded-[4px]">
+          {Icon ? <Icon className="w-3.5 h-3.5 text-[#C9A24B]" /> : <Shield className="w-3.5 h-3.5 text-[#C9A24B]" />}
+          <span className="text-xs font-mono text-[#F5F3EE] tracking-wider uppercase">
+            {roleInfo.roleName} Onboarding
+          </span>
         </div>
-        <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">{title}</h1>
-        <p className="text-gray-400 text-lg">{description}</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#F5F3EE]">
+          {title}
+        </h1>
+        <p className="text-xs text-[#6B7280]">
+          {description}
+        </p>
       </div>
 
-      {/* Form Card */}
-      <div className="bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800/50 border border-zinc-800 rounded-2xl p-8 shadow-2xl backdrop-blur-sm">
-        {/* Role Information Banner */}
-        
-
-        {/* API Error Message */}
+      <TerminalPanel
+        header={`REGISTER ${roleInfo.roleName.toUpperCase()}`}
+        badge={<StatusBadge variant={roleInfo.badgeVariant}>{roleInfo.badgeText}</StatusBadge>}
+      >
         {apiError && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
-            <p className="text-sm text-red-400 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <div className="mb-4 p-3 bg-[#B23B3B]/10 border border-[#B23B3B]/40 rounded-[3px]">
+            <p className="text-xs text-[#e74c3c] flex items-center gap-2">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               {apiError}
             </p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Username Field */}
-          <div className="group">
-            <label htmlFor="username" className="block text-sm font-semibold text-gray-300 mb-2">
-              Username
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Username */}
+          <div className="space-y-1.5">
+            <label htmlFor="username" className="block text-xs font-mono text-[#6B7280] uppercase">
+              Operator Username
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors">
-                <User className={`h-5 w-5 transition-colors ${
-                  errors.username ? 'text-red-400' : 'text-gray-500 group-focus-within:text-white'
-                }`} />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User className="h-4 w-4 text-[#6B7280]" />
               </div>
               <input
                 type="text"
@@ -194,32 +182,25 @@ export default function SignUpForm({ role, icon: Icon, title, description }) {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className={`block w-full pl-12 pr-4 py-3.5 bg-black/50 border-2 ${
-                  errors.username 
-                    ? 'border-red-500/50 focus:border-red-500' 
-                    : 'border-zinc-700 focus:border-white'
-                } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-white/10 transition-all duration-200`}
-                placeholder="your_username"
+                className={`w-full pl-9 pr-3 py-2 text-xs font-mono bg-[#0E1013] border ${
+                  errors.username ? "border-[#B23B3B]" : "border-[#2A2D33]"
+                } rounded-[4px] text-[#F5F3EE] placeholder-[#4B5262] focus:outline-none focus:border-[#C9A24B]`}
+                placeholder="operator_alias"
               />
             </div>
             {errors.username && (
-              <p className="mt-2 text-sm text-red-400 flex items-center gap-1.5 animate-in slide-in-from-top-1 duration-200">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                {errors.username}
-              </p>
+              <p className="text-[11px] font-mono text-[#e74c3c]">{errors.username}</p>
             )}
           </div>
 
-          {/* Wallet Address Field */}
-          <div className="group">
-            <label htmlFor="wallet" className="block text-sm font-semibold text-gray-300 mb-2">
-              Ethereum Wallet Address
+          {/* Wallet Address */}
+          <div className="space-y-1.5">
+            <label htmlFor="wallet" className="block text-xs font-mono text-[#6B7280] uppercase">
+              Primary Settlement Wallet (EVM)
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors">
-                <Wallet className={`h-5 w-5 transition-colors ${
-                  errors.wallet ? 'text-red-400' : 'text-gray-500 group-focus-within:text-white'
-                }`} />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Wallet className="h-4 w-4 text-[#6B7280]" />
               </div>
               <input
                 type="text"
@@ -227,35 +208,25 @@ export default function SignUpForm({ role, icon: Icon, title, description }) {
                 name="wallet"
                 value={formData.wallet}
                 onChange={handleChange}
-                className={`block w-full pl-12 pr-4 py-3.5 bg-black/50 border-2 ${
-                  errors.wallet 
-                    ? 'border-red-500/50 focus:border-red-500' 
-                    : 'border-zinc-700 focus:border-white'
-                } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-white/10 transition-all duration-200 font-mono text-sm`}
+                className={`w-full pl-9 pr-3 py-2 text-xs font-mono bg-[#0E1013] border ${
+                  errors.wallet ? "border-[#B23B3B]" : "border-[#2A2D33]"
+                } rounded-[4px] text-[#F5F3EE] placeholder-[#4B5262] focus:outline-none focus:border-[#C9A24B]`}
                 placeholder="0x..."
               />
             </div>
-            <p className="mt-1.5 text-xs text-gray-500">
-              Your wallet will be used for all transactions on the platform
-            </p>
             {errors.wallet && (
-              <p className="mt-2 text-sm text-red-400 flex items-center gap-1.5 animate-in slide-in-from-top-1 duration-200">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                {errors.wallet}
-              </p>
+              <p className="text-[11px] font-mono text-[#e74c3c]">{errors.wallet}</p>
             )}
           </div>
 
-          {/* Password Field */}
-          <div className="group">
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-300 mb-2">
-              Password
+          {/* Password */}
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="block text-xs font-mono text-[#6B7280] uppercase">
+              Access Key (Password, min 8 chars)
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors">
-                <Lock className={`h-5 w-5 transition-colors ${
-                  errors.password ? 'text-red-400' : 'text-gray-500 group-focus-within:text-white'
-                }`} />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="h-4 w-4 text-[#6B7280]" />
               </div>
               <input
                 type="password"
@@ -263,32 +234,25 @@ export default function SignUpForm({ role, icon: Icon, title, description }) {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className={`block w-full pl-12 pr-4 py-3.5 bg-black/50 border-2 ${
-                  errors.password 
-                    ? 'border-red-500/50 focus:border-red-500' 
-                    : 'border-zinc-700 focus:border-white'
-                } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-white/10 transition-all duration-200`}
+                className={`w-full pl-9 pr-3 py-2 text-xs font-mono bg-[#0E1013] border ${
+                  errors.password ? "border-[#B23B3B]" : "border-[#2A2D33]"
+                } rounded-[4px] text-[#F5F3EE] placeholder-[#4B5262] focus:outline-none focus:border-[#C9A24B]`}
                 placeholder="••••••••"
               />
             </div>
             {errors.password && (
-              <p className="mt-2 text-sm text-red-400 flex items-center gap-1.5 animate-in slide-in-from-top-1 duration-200">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                {errors.password}
-              </p>
+              <p className="text-[11px] font-mono text-[#e74c3c]">{errors.password}</p>
             )}
           </div>
 
-          {/* Confirm Password Field */}
-          <div className="group">
-            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-300 mb-2">
-              Confirm Password
+          {/* Confirm Password */}
+          <div className="space-y-1.5">
+            <label htmlFor="confirmPassword" className="block text-xs font-mono text-[#6B7280] uppercase">
+              Confirm Access Key
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors">
-                <Lock className={`h-5 w-5 transition-colors ${
-                  errors.confirmPassword ? 'text-red-400' : 'text-gray-500 group-focus-within:text-white'
-                }`} />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="h-4 w-4 text-[#6B7280]" />
               </div>
               <input
                 type="password"
@@ -296,95 +260,48 @@ export default function SignUpForm({ role, icon: Icon, title, description }) {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`block w-full pl-12 pr-4 py-3.5 bg-black/50 border-2 ${
-                  errors.confirmPassword 
-                    ? 'border-red-500/50 focus:border-red-500' 
-                    : 'border-zinc-700 focus:border-white'
-                } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-white/10 transition-all duration-200`}
+                className={`w-full pl-9 pr-3 py-2 text-xs font-mono bg-[#0E1013] border ${
+                  errors.confirmPassword ? "border-[#B23B3B]" : "border-[#2A2D33]"
+                } rounded-[4px] text-[#F5F3EE] placeholder-[#4B5262] focus:outline-none focus:border-[#C9A24B]`}
                 placeholder="••••••••"
               />
             </div>
             {errors.confirmPassword && (
-              <p className="mt-2 text-sm text-red-400 flex items-center gap-1.5 animate-in slide-in-from-top-1 duration-200">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                {errors.confirmPassword}
-              </p>
+              <p className="text-[11px] font-mono text-[#e74c3c]">{errors.confirmPassword}</p>
             )}
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="group relative w-full bg-gradient-to-r from-white to-gray-100 text-black py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-white/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-            {isLoading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                Creating Account...
-              </>
-            ) : (
-              <>
-                Create {role.charAt(0).toUpperCase() + role.slice(1)} Account
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </>
-            )}
-          </button>
+          <div className="pt-2">
+            <TerminalButton
+              type="submit"
+              disabled={isLoading}
+              variant="brass"
+              size="md"
+              fullWidth
+            >
+              {isLoading ? "Creating Identity Record..." : `Register as ${roleInfo.roleName}`}
+            </TerminalButton>
+          </div>
         </form>
 
-        {/* Next Steps Info */}
-        <div className="mt-6 p-5 bg-gradient-to-br from-zinc-800/80 to-zinc-800/40 rounded-xl border border-zinc-700/50">
-          <p className="text-xs font-bold text-white mb-2 flex items-center gap-2">
-            <span className="text-lg">📋</span> What happens next?
+        {/* Operational Context */}
+        <div className="mt-5 p-3 bg-[#0E1013] border border-[#2A2D33] rounded-[3px] space-y-2">
+          <div className="text-[11px] font-mono text-[#C9A24B] uppercase tracking-wider">
+            Operational Lifecycle
+          </div>
+          <p className="text-xs text-[#6B7280] leading-relaxed">
+            {roleInfo.nextSteps}
           </p>
-          <p className="text-xs text-gray-300 mb-3 leading-relaxed">{roleInfo.nextSteps}</p>
-          {roleInfo.hasTiers && (
-            <div className="text-xs text-gray-400 space-y-2 mt-3 pt-3 border-t border-zinc-700/50">
-              <p className="flex items-start gap-2">
-                <span className="text-blue-400 font-bold flex-shrink-0">• Tier 1</span>
-                <span>(Starting tier) - Basic access to platform features</span>
-              </p>
-              <p className="flex items-start gap-2">
-                <span className="text-purple-400 font-bold flex-shrink-0">• Tier 2</span>
-                <span>(ENS verified) - Enhanced features and better terms</span>
-              </p>
-              <p className="flex items-start gap-2">
-                <span className="text-green-400 font-bold flex-shrink-0">• Tier 3</span>
-                <span>(Passport verified) - Premium access and best rates</span>
-              </p>
-            </div>
-          )}
         </div>
 
-        {/* Divider */}
-        <div className="mt-8 flex items-center gap-4">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent"></div>
-          <span className="text-sm text-gray-500 font-medium">OR</span>
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent"></div>
+        {/* Switch Role / Sign In */}
+        <div className="mt-5 pt-4 border-t border-[#2A2D33] flex items-center justify-between text-xs">
+          <span className="text-[#6B7280]">Already registered?</span>
+          <Link href="/signin" className="text-[#C9A24B] hover:underline font-mono">
+            Authenticate Session
+          </Link>
         </div>
-
-        {/* Sign up as different role */}
-        <div className="mt-6 space-y-2.5">
-          {getRoleLinks().map((roleLink) => (
-            <Link
-              key={roleLink.path}
-              href={roleLink.path}
-              className="block w-full text-center py-3 border-2 border-zinc-700 rounded-xl text-gray-300 hover:bg-zinc-800 hover:border-zinc-600 transition-all duration-200 font-medium hover:scale-[1.01] active:scale-[0.99]"
-            >
-              Sign up as {roleLink.name}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Sign In Link */}
-      <p className="text-center mt-8 text-gray-400">
-        Already have an account?{' '}
-        <Link href="/signin" className="text-white font-semibold hover:text-gray-300 transition-all duration-200 hover:underline">
-          Sign In
-        </Link>
-      </p>
+      </TerminalPanel>
     </div>
   );
 }

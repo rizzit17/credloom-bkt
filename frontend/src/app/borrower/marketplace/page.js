@@ -341,62 +341,66 @@ export default function LoanMarketplace() {
               <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
               <h2 className="text-2xl font-bold mb-2">Processing Transaction</h2>
               <p className="text-gray-400">Creating loan on the blockchain...</p>
-              <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
+              <div className="w-12 h-12 border-2 border-[#C9A24B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2 text-[#F5F3EE]">Broadcasting Transaction...</h2>
+              <p className="text-xs text-[#6B7280] mb-4">Confirming on-chain escrow disbursal.</p>
+              <div className="p-3 bg-[#0E1013] border border-[#2A2D33] rounded-[4px] text-xs font-mono text-[#6B7280]">
+                EVM RPC SUBMITTED
+              </div>
             </>
           )}
           
           {transactionStatus === 'confirmed' && (
             <>
-              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-12 h-12 text-white" strokeWidth={3} />
+              <div className="w-12 h-12 rounded-[4px] bg-[#1B7A5A]/15 border border-[#1B7A5A]/40 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-6 h-6 text-[#2ecc71]" />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-green-400">Loan Accepted!</h2>
-              <p className="text-gray-400 mb-6">Your loan has been successfully created on the blockchain.</p>
+              <h2 className="text-xl font-semibold mb-1 text-[#2ecc71]">Loan Disbursed</h2>
+              <p className="text-xs text-[#6B7280] mb-6">Autonomous escrow contract activated.</p>
               
               {loanId && (
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4 mb-4">
-                  <p className="text-xs text-gray-400 mb-1">Loan ID</p>
-                  <p className="text-xl font-bold text-green-400">#{loanId}</p>
+                <div className="bg-[#0E1013] border border-[#2A2D33] rounded-[4px] p-3 mb-3 text-left">
+                  <span className="text-[10px] text-[#6B7280] font-mono block">LOAN ID</span>
+                  <span className="text-base font-mono font-bold text-[#F5F3EE]">#{loanId}</span>
                 </div>
               )}
               
               {txHash && (
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4 mb-4">
-                  <p className="text-xs text-gray-400 mb-2">Transaction Hash</p>
-                  <div className="flex items-center justify-center gap-2">
-                    <code className="text-sm text-gray-300 font-mono">{formatTxHash(txHash, 8)}</code>
+                <div className="bg-[#0E1013] border border-[#2A2D33] rounded-[4px] p-3 mb-4 text-left">
+                  <span className="text-[10px] text-[#6B7280] font-mono block mb-1">TRANSACTION HASH</span>
+                  <div className="flex items-center justify-between">
+                    <code className="text-xs font-mono text-[#C9A24B]">{formatTxHash(txHash, 8)}</code>
                     <button
                       onClick={() => window.open(`https://etherscan.io/tx/${txHash}`, '_blank')}
-                      className="text-blue-400 hover:text-blue-300 transition-colors"
-                      title="View on Etherscan"
+                      className="text-[#6B7280] hover:text-[#F5F3EE]"
                     >
-                      <ExternalLink className="w-4 h-4" />
+                      <ExternalLink className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               )}
               
-              <p className="text-sm text-gray-500">Redirecting to dashboard...</p>
+              <p className="text-xs font-mono text-[#6B7280]">Redirecting to console...</p>
             </>
           )}
           
           {transactionStatus === 'error' && (
             <>
-              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertCircle className="w-10 h-10 text-red-400" />
+              <div className="w-12 h-12 rounded-[4px] bg-[#B23B3B]/15 border border-[#B23B3B]/40 flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-6 h-6 text-[#e74c3c]" />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-red-400">Transaction Failed</h2>
-              <p className="text-gray-400 mb-4">There was an error accepting the loan offer.</p>
+              <h2 className="text-xl font-semibold mb-1 text-[#e74c3c]">Execution Reverted</h2>
+              <p className="text-xs text-[#6B7280] mb-4">The smart contract rejected the disbursal call.</p>
               {apiError && (
-                <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 mb-4 text-left">
-                  <p className="text-sm text-red-400">{apiError}</p>
+                <div className="bg-[#B23B3B]/10 border border-[#B23B3B]/40 rounded-[4px] p-3 mb-4 text-left">
+                  <p className="text-xs font-mono text-[#e74c3c]">{apiError}</p>
                 </div>
               )}
               <button
                 onClick={() => setTransactionStatus(null)}
-                className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                className="w-full py-2 bg-[#C9A24B] text-[#0E1013] text-xs font-semibold rounded-[4px]"
               >
-                Try Again
+                Dismiss & Retry
               </button>
             </>
           )}
@@ -408,8 +412,8 @@ export default function LoanMarketplace() {
   // Confirmation Modal for Blockchain Offers
   if (showConfirmation && selectedOffer) {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-12 px-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-[#0E1013] text-[#F5F3EE] pt-24 pb-12 px-4">
+        <div className="max-w-2xl mx-auto">
           <Link
             href="/borrower/marketplace"
             onClick={(e) => {
@@ -417,130 +421,54 @@ export default function LoanMarketplace() {
               setShowConfirmation(false);
               setSelectedOffer(null);
             }}
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-xs font-mono text-[#6B7280] hover:text-[#F5F3EE] transition-colors mb-4"
           >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Marketplace
+            <ArrowLeft className="w-4 h-4" />
+            RETURN TO MARKETPLACE
           </Link>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8">
-            <h1 className="text-3xl font-bold mb-6">Confirm Blockchain Loan</h1>
-
-            {/* Loan Summary */}
-            <div className="space-y-6 mb-8">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Loan Amount</p>
-                  <p className="text-2xl font-bold">Ξ{selectedOffer.amountEth}</p>
-                </div>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Duration</p>
-                  <p className="text-2xl font-bold">{selectedOffer.durationDays} days</p>
-                </div>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Min Credit Score</p>
-                  <p className="text-xl font-bold">{selectedOffer.minCreditScore}</p>
-                </div>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Lender</p>
-                  <p className="text-sm font-mono">{selectedOffer.lender.slice(0, 6)}...{selectedOffer.lender.slice(-4)}</p>
-                </div>
-              </div>
-
-              <div className="border-t border-zinc-800 pt-6">
-                <h3 className="font-semibold mb-3">Loan Terms</h3>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Principal Amount</span>
-                      <span className="font-semibold">Ξ{selectedOffer.amountEth}</span>
-                    </div>
-                    {interestRateData && (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Interest Rate (APR)</span>
-                          <span className="font-semibold text-green-400">{interestRateData.interestRate}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Interest Amount</span>
-                          <span className="font-semibold text-yellow-400">
-                            Ξ{(() => {
-                              const principal = parseFloat(selectedOffer.amountEth);
-                              const rateDecimal = interestRateData.interestRate / 100;
-                              const durationYears = selectedOffer.durationDays / 365;
-                              const interest = principal * rateDecimal * durationYears;
-                              return interest.toFixed(4);
-                            })()}
-                          </span>
-                        </div>
-                        <div className="flex justify-between border-t border-zinc-700 pt-3">
-                          <span className="text-gray-300 font-semibold">Total Repayment</span>
-                          <span className="font-bold text-lg text-white">
-                            Ξ{(() => {
-                              const principal = parseFloat(selectedOffer.amountEth);
-                              const rateDecimal = interestRateData.interestRate / 100;
-                              const durationYears = selectedOffer.durationDays / 365;
-                              const interest = principal * rateDecimal * durationYears;
-                              return (principal + interest).toFixed(4);
-                            })()}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Maturity Date</span>
-                      <span className="font-semibold">
-                        {(() => {
-                          const dueDate = new Date();
-                          dueDate.setDate(dueDate.getDate() + selectedOffer.durationDays);
-                          return dueDate.toLocaleDateString();
-                        })()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {borrowerWallet && (
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Your Wallet</p>
-                  <p className="text-sm font-mono text-blue-400">{borrowerWallet}</p>
-                </div>
-              )}
+          <div className="bg-[#14171C] border border-[#2A2D33] rounded-[4px] p-6 space-y-6">
+            <div>
+              <span className="text-xs font-mono text-[#6B7280]">ESCROW DEPLOYMENT CONFIRMATION</span>
+              <h1 className="text-2xl font-semibold text-[#F5F3EE]">Accept Liquidity Offer</h1>
             </div>
 
-            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-semibold text-yellow-400 mb-1">Important</p>
-                  <p className="text-gray-300">
-                    This transaction will be executed on the blockchain. You agree to repay the full amount by the deadline. Failure to repay will result in default penalties and reputation damage.
-                  </p>
-                </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-[#0E1013] border border-[#2A2D33] rounded-[4px] p-3">
+                <span className="text-[10px] text-[#6B7280] font-mono block">PRINCIPAL</span>
+                <span className="text-lg font-mono font-bold text-[#F5F3EE] tabular-nums">Ξ{selectedOffer.amountEth}</span>
+              </div>
+              <div className="bg-[#0E1013] border border-[#2A2D33] rounded-[4px] p-3">
+                <span className="text-[10px] text-[#6B7280] font-mono block">DURATION</span>
+                <span className="text-lg font-mono font-bold text-[#F5F3EE] tabular-nums">{selectedOffer.durationDays}d</span>
+              </div>
+              <div className="bg-[#0E1013] border border-[#2A2D33] rounded-[4px] p-3">
+                <span className="text-[10px] text-[#6B7280] font-mono block">MIN SCORE</span>
+                <span className="text-lg font-mono font-bold text-[#C9A24B] tabular-nums">{selectedOffer.minCreditScore}</span>
+              </div>
+              <div className="bg-[#0E1013] border border-[#2A2D33] rounded-[4px] p-3">
+                <span className="text-[10px] text-[#6B7280] font-mono block">LENDER</span>
+                <span className="text-xs font-mono text-[#F5F3EE] truncate block">{selectedOffer.lender.slice(0, 6)}...{selectedOffer.lender.slice(-4)}</span>
               </div>
             </div>
 
-            {isFlagged && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm">
-                    <p className="font-semibold text-red-400 mb-1">Account Flagged</p>
-                    <p className="text-gray-300">
-                      Your account has been flagged due to previous defaults. You cannot accept loans at this time.
-                    </p>
-                  </div>
-                </div>
+            {borrowerWallet && (
+              <div className="p-3 bg-[#0E1013] border border-[#2A2D33] rounded-[4px] flex items-center justify-between text-xs font-mono">
+                <span className="text-[#6B7280]">SETTLEMENT DESTINATION:</span>
+                <span className="text-[#F5F3EE]">{borrowerWallet}</span>
               </div>
             )}
+
+            <div className="p-3 bg-[#0E1013] border border-[#B23B3B]/40 rounded-[4px] text-xs font-mono text-[#e74c3c]">
+              WARNING: Failure to repay principal within agreed duration + 7 day grace window triggers irreversible blacklisting on ReputationRegistry.sol.
+            </div>
 
             <button
               onClick={handleAcceptBlockchainOffer}
               disabled={isFlagged || !borrowerWallet}
-              className="w-full px-6 py-4 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-[#C9A24B] text-[#0E1013] rounded-[4px] text-xs font-semibold font-mono uppercase hover:bg-[#D4B263] transition-colors disabled:opacity-40"
             >
-              {!borrowerWallet ? 'Connect Wallet First' : isFlagged ? 'Cannot Accept (Flagged)' : 'Confirm & Accept Loan'}
+              {!borrowerWallet ? 'Wallet Not Bound' : isFlagged ? 'Wallet Blacklisted' : 'Execute Escrow Disbursal'}
             </button>
           </div>
         </div>
@@ -551,120 +479,60 @@ export default function LoanMarketplace() {
   // Confirmation Modal (for old backend API lenders)
   if (showConfirmation && selectedLender && selectedOption) {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-12 px-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-[#0E1013] text-[#F5F3EE] pt-24 pb-12 px-4">
+        <div className="max-w-2xl mx-auto">
           <Link
             href="/borrower/marketplace"
             onClick={(e) => {
               e.preventDefault();
               setShowConfirmation(false);
             }}
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-xs font-mono text-[#6B7280] hover:text-[#F5F3EE] transition-colors mb-4"
           >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Marketplace
+            <ArrowLeft className="w-4 h-4" />
+            RETURN TO MARKETPLACE
           </Link>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8">
-            <h1 className="text-3xl font-bold mb-6">Confirm Your Loan</h1>
+          <div className="bg-[#14171C] border border-[#2A2D33] rounded-[4px] p-6 space-y-6">
+            <h1 className="text-2xl font-semibold text-[#F5F3EE]">Confirm Loan Parameters</h1>
 
-            {/* Loan Summary */}
-            <div className="space-y-6 mb-8">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Loan Amount</p>
-                  <p className="text-2xl font-bold">${loanAmount}</p>
-                </div>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Duration</p>
-                  <p className="text-2xl font-bold">{selectedOption.duration} days</p>
-                </div>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Lender</p>
-                  <p className="text-sm font-mono">#{selectedLender.id}</p>
-                </div>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Available Liquidity</p>
-                  <p className="text-sm font-bold">${selectedOption.availableAmount}</p>
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-[#0E1013] border border-[#2A2D33] rounded-[4px] p-3">
+                <span className="text-[10px] text-[#6B7280] font-mono block">PRINCIPAL</span>
+                <span className="text-xl font-mono font-bold text-[#F5F3EE] tabular-nums">${loanAmount}</span>
               </div>
-
-              <div className="border-t border-zinc-800 pt-6">
-                <h3 className="font-semibold mb-3">Loan Terms</h3>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Principal Amount</span>
-                      <span className="font-semibold">${loanAmount}</span>
-                    </div>
-                    {interestRateData && (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Interest Rate (APR)</span>
-                          <span className="font-semibold text-green-400">{interestRateData.interestRate}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Interest Amount</span>
-                          <span className="font-semibold text-yellow-400">
-                            ${(() => {
-                              const principal = parseFloat(loanAmount);
-                              const rateDecimal = interestRateData.interestRate / 100;
-                              const durationYears = selectedOption.duration / 365;
-                              const interest = principal * rateDecimal * durationYears;
-                              return interest.toFixed(2);
-                            })()}
-                          </span>
-                        </div>
-                        <div className="flex justify-between border-t border-zinc-700 pt-3">
-                          <span className="text-gray-300 font-semibold">Total Repayment</span>
-                          <span className="font-bold text-lg text-white">
-                            ${(() => {
-                              const principal = parseFloat(loanAmount);
-                              const rateDecimal = interestRateData.interestRate / 100;
-                              const durationYears = selectedOption.duration / 365;
-                              const interest = principal * rateDecimal * durationYears;
-                              return (principal + interest).toFixed(2);
-                            })()}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Loan Duration</span>
-                      <span className="font-semibold">{selectedOption.duration} days</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Maturity Date</span>
-                      <span className="font-semibold">
-                        {(() => {
-                          const dueDate = new Date();
-                          dueDate.setDate(dueDate.getDate() + selectedOption.duration);
-                          return dueDate.toLocaleDateString();
-                        })()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              <div className="bg-[#0E1013] border border-[#2A2D33] rounded-[4px] p-3">
+                <span className="text-[10px] text-[#6B7280] font-mono block">DURATION</span>
+                <span className="text-xl font-mono font-bold text-[#F5F3EE] tabular-nums">{selectedOption.duration} days</span>
               </div>
             </div>
 
-            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-semibold text-yellow-400 mb-1">Important</p>
-                  <p className="text-gray-300">
-                    By accepting this loan, you agree to repay the full amount by the deadline. Failure to repay will result in credit score penalties and stake slashing.
-                  </p>
+            {interestRateData && (
+              <div className="p-3 bg-[#0E1013] border border-[#2A2D33] rounded-[4px] space-y-2 text-xs font-mono">
+                <div className="flex justify-between">
+                  <span className="text-[#6B7280]">DYNAMIC APR:</span>
+                  <span className="text-[#2ecc71]">{interestRateData.interestRate}%</span>
+                </div>
+                <div className="flex justify-between border-t border-[#2A2D33] pt-2">
+                  <span className="text-[#6B7280]">TOTAL DUE AT MATURITY:</span>
+                  <span className="text-sm font-bold text-[#C9A24B]">
+                    ${(() => {
+                      const principal = parseFloat(loanAmount);
+                      const rateDecimal = interestRateData.interestRate / 100;
+                      const durationYears = selectedOption.duration / 365;
+                      const interest = principal * rateDecimal * durationYears;
+                      return (principal + interest).toFixed(2);
+                    })()}
+                  </span>
                 </div>
               </div>
-            </div>
+            )}
 
             <button
               onClick={handleAcceptLoan}
-              className="w-full px-6 py-4 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-colors text-lg"
+              className="w-full py-3 bg-[#C9A24B] text-[#0E1013] rounded-[4px] text-xs font-semibold font-mono uppercase hover:bg-[#D4B263] transition-colors"
             >
-              Confirm & Accept Loan
+              Confirm Loan Contract
             </button>
           </div>
         </div>
@@ -673,139 +541,88 @@ export default function LoanMarketplace() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-12 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#0E1013] text-[#F5F3EE] pt-8 pb-16 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
         {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/borrower"
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Dashboard
-          </Link>
-          <h1 className="text-4xl font-bold mb-2">Loan Marketplace</h1>
-          <p className="text-gray-400">Find the best loan offers based on your credit score</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#2A2D33]">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Link href="/borrower" className="text-xs font-mono text-[#6B7280] hover:text-[#F5F3EE]">
+                ← BORROWER TERMINAL
+              </Link>
+              <span className="text-xs font-mono text-[#6B7280]">·</span>
+              <span className="text-xs font-mono text-[#C9A24B]">MARKETPLACE</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#F5F3EE]">
+              Liquidity Pool Discovery
+            </h1>
+          </div>
         </div>
 
         {/* Credit Score & Interest Rate Info Banner */}
         {borrowerData && (
-          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Your Credit Score</p>
-                  <p className="text-2xl font-bold text-blue-400">{borrowerData.creditScore}</p>
-                </div>
+          <div className="p-4 bg-[#14171C] border border-[#2A2D33] rounded-[4px]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-3 bg-[#0E1013] border border-[#2A2D33] rounded-[3px]">
+                <span className="text-[10px] text-[#6B7280] font-mono block">CREDIT SCORE (GBR)</span>
+                <span className="text-xl font-mono font-bold text-[#F5F3EE] tabular-nums">{borrowerData.creditScore} / 1000</span>
               </div>
               
               {interestRateData && (
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
-                    <Percent className="w-6 h-6 text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-400">Your Interest Rate</p>
-                    <p className="text-2xl font-bold text-green-400">{interestRateData.interestRate}% APR</p>
-                  </div>
+                <div className="p-3 bg-[#0E1013] border border-[#2A2D33] rounded-[3px]">
+                  <span className="text-[10px] text-[#6B7280] font-mono block">DYNAMIC APR BRACKET</span>
+                  <span className="text-xl font-mono font-bold text-[#2ecc71] tabular-nums">{interestRateData.interestRate}% APR</span>
                 </div>
               )}
               
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-purple-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Wallet</p>
-                  <p className="font-mono text-sm text-purple-400">{borrowerData.wallet ? `${borrowerData.wallet.slice(0, 6)}...${borrowerData.wallet.slice(-4)}` : 'Not connected'}</p>
-                </div>
+              <div className="p-3 bg-[#0E1013] border border-[#2A2D33] rounded-[3px]">
+                <span className="text-[10px] text-[#6B7280] font-mono block">SETTLEMENT WALLET</span>
+                <span className="text-xs font-mono text-[#C9A24B] truncate block mt-1">
+                  {borrowerData.wallet ? `${borrowerData.wallet.slice(0, 8)}...${borrowerData.wallet.slice(-6)}` : 'DISCONNECTED'}
+                </span>
               </div>
             </div>
-            
-            {interestRateData && (
-              <div className="mt-4 pt-4 border-t border-blue-500/20">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500">Risk State</p>
-                    <p className={`font-semibold capitalize ${
-                      interestRateData.riskState === 'healthy' ? 'text-green-400' :
-                      interestRateData.riskState === 'warning' ? 'text-yellow-400' :
-                      'text-red-400'
-                    }`}>{interestRateData.riskState}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Tier</p>
-                    <p className="font-semibold text-blue-400">Tier {interestRateData.tier}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Available Credit</p>
-                    <p className="font-semibold text-white">${interestRateData.availableCredit?.toLocaleString() || '0'}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Max Loan Amount</p>
-                    <p className="font-semibold text-white">${interestRateData.maxLoanAmount?.toLocaleString() || '0'}</p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
         {/* API Error Display */}
         {apiError && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400" />
-              <p className="text-red-400">{apiError}</p>
-            </div>
+          <div className="p-3 bg-[#B23B3B]/10 border border-[#B23B3B]/40 rounded-[4px] text-xs font-mono text-[#e74c3c] flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{apiError}</span>
           </div>
         )}
 
-
-        {/* Search Form */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8">
-          <h2 className="text-xl font-bold mb-6">Request a Loan</h2>
+        {/* Search & Request Form */}
+        <div className="p-5 bg-[#14171C] border border-[#2A2D33] rounded-[4px] space-y-4">
+          <div className="text-xs font-mono text-[#6B7280] uppercase tracking-wider">
+            Simulate Loan Request
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-400 mb-2">
-                Loan Amount
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <div className="sm:col-span-2 space-y-1.5">
+              <label className="block text-xs font-mono text-[#6B7280] uppercase">
+                Requested Loan Principal (USD Equivalent)
               </label>
               <div className="relative">
-                <Coins className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="number"
                   value={loanAmount}
                   onChange={(e) => setLoanAmount(e.target.value)}
-                  placeholder="Enter amount"
-                  className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                  placeholder="e.g. 1500"
+                  className="w-full px-3 py-2 text-xs font-mono bg-[#0E1013] border border-[#2A2D33] rounded-[4px] text-[#F5F3EE] placeholder-[#4B5262] focus:outline-none focus:border-[#C9A24B]"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Enter the amount you wish to borrow
-              </p>
             </div>
 
-            <div className="flex items-end">
+            <div>
               <button
                 onClick={handleSearch}
                 disabled={isLoading}
-                className="w-full px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-2 bg-[#C9A24B] text-[#0E1013] rounded-[4px] text-xs font-semibold font-mono uppercase hover:bg-[#D4B263] transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
               >
-                {isLoading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                    Searching...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-5 h-5" />
-                    Find Lenders
-                  </>
-                )}
+                {isLoading ? "Querying Order Books..." : "Scan Liquidity Pools"}
               </button>
             </div>
           </div>
@@ -813,103 +630,83 @@ export default function LoanMarketplace() {
 
         {/* Results */}
         {searchSubmitted && !isLoading && (
-          <>
+          <div className="space-y-4">
             {filteredLenders.length > 0 ? (
               <>
                 {/* Filters */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6">
-                  <div className="flex items-center gap-4">
-                    <Filter className="w-5 h-5 text-gray-400" />
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={filterInsuredOnly}
-                        onChange={(e) => setFilterInsuredOnly(e.target.checked)}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">Insured Only</span>
-                    </label>
-                    <select
-                      value={filterMaxDuration || ''}
-                      onChange={(e) => setFilterMaxDuration(e.target.value ? parseInt(e.target.value) : null)}
-                      className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-blue-500"
-                    >
-                      <option value="">All Durations</option>
-                      <option value="30">30 days</option>
-                      <option value="60">60 days</option>
-                      <option value="90">90 days</option>
-                    </select>
-                  </div>
+                <div className="flex items-center gap-4 text-xs font-mono p-3 bg-[#14171C] border border-[#2A2D33] rounded-[4px]">
+                  <span className="text-[#6B7280]">FILTER:</span>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filterInsuredOnly}
+                      onChange={(e) => setFilterInsuredOnly(e.target.checked)}
+                      className="accent-[#C9A24B]"
+                    />
+                    <span>INSURED COVERAGE ONLY</span>
+                  </label>
+                  <select
+                    value={filterMaxDuration || ''}
+                    onChange={(e) => setFilterMaxDuration(e.target.value ? parseInt(e.target.value) : null)}
+                    className="px-2 py-1 bg-[#0E1013] border border-[#2A2D33] rounded-[3px] text-xs font-mono text-[#F5F3EE] focus:outline-none focus:border-[#C9A24B]"
+                  >
+                    <option value="">ALL DURATIONS</option>
+                    <option value="30">30 DAYS MAX</option>
+                    <option value="60">60 DAYS MAX</option>
+                    <option value="90">90 DAYS MAX</option>
+                  </select>
                 </div>
 
                 {/* Lender Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredLenders.map((lender) => (
-                    <div key={lender.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="font-bold">Lender #{lender.id}</h3>
-                          <p className="text-xs text-gray-500 font-mono">{lender.wallet && `${lender.wallet.slice(0, 6)}...${lender.wallet.slice(-4)}`}</p>
-                        </div>
+                    <div key={lender.id} className="p-4 bg-[#14171C] border border-[#2A2D33] rounded-[4px] space-y-3">
+                      <div className="flex items-center justify-between border-b border-[#2A2D33] pb-2">
+                        <span className="text-xs font-mono font-semibold text-[#F5F3EE]">LENDER #{lender.id}</span>
+                        <span className="text-[10px] font-mono text-[#6B7280]">
+                          {lender.wallet && `${lender.wallet.slice(0, 6)}...${lender.wallet.slice(-4)}`}
+                        </span>
                       </div>
 
-                      <div className="space-y-3 mb-6">
-                        
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">Loan Options</p>
-                          <p className="text-sm text-gray-400">{lender.options.length} available</p>
-                        </div>
-                      </div>
-
-                      <div className="border-t border-zinc-800 pt-4">
-                        <p className="text-sm text-gray-400 mb-3">Select Loan Term:</p>
-                        <div className="space-y-2">
-                          {lender.options
-                            .filter(opt => !filterMaxDuration || opt.duration === filterMaxDuration)
-                            .map((option) => (
-                            <button
-                              key={option.option_id}
-                              onClick={() => handleSelectLender(lender, option)}
-                              disabled={parseFloat(loanAmount) < option.minAmount || parseFloat(loanAmount) > option.availableAmount}
-                              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg hover:border-blue-500 hover:bg-zinc-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                            >
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="font-semibold">{option.duration} days</span>
-                                <span className="text-xs text-gray-400">${option.minAmount} - ${option.availableAmount}</span>
-                              </div>
-                              {parseFloat(loanAmount) < option.minAmount && (
-                                <p className="text-xs text-red-400">Below minimum amount</p>
-                              )}
-                              {parseFloat(loanAmount) > option.availableAmount && (
-                                <p className="text-xs text-red-400">Exceeds available liquidity</p>
-                              )}
-                            </button>
-                          ))}
-                        </div>
+                      <div className="space-y-1.5">
+                        <span className="text-[11px] font-mono text-[#6B7280]">SELECT TRANCHE:</span>
+                        {lender.options
+                          .filter(opt => !filterMaxDuration || opt.duration === filterMaxDuration)
+                          .map((option) => (
+                          <button
+                            key={option.option_id}
+                            onClick={() => handleSelectLender(lender, option)}
+                            disabled={parseFloat(loanAmount) < option.minAmount || parseFloat(loanAmount) > option.availableAmount}
+                            className="w-full p-2.5 bg-[#0E1013] border border-[#2A2D33] hover:border-[#C9A24B] rounded-[3px] transition-colors text-left disabled:opacity-40"
+                          >
+                            <div className="flex justify-between text-xs font-mono">
+                              <span className="text-[#F5F3EE]">{option.duration} Days</span>
+                              <span className="text-[#C9A24B]">${option.minAmount} — ${option.availableAmount}</span>
+                            </div>
+                            {parseFloat(loanAmount) < option.minAmount && (
+                              <div className="text-[10px] font-mono text-[#e74c3c] mt-1">BELOW MINIMUM</div>
+                            )}
+                            {parseFloat(loanAmount) > option.availableAmount && (
+                              <div className="text-[10px] font-mono text-[#e74c3c] mt-1">EXCEEDS POOL LIQUIDITY</div>
+                            )}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center">
-                <Search className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold mb-2">No Lenders Found</h3>
-                <p className="text-gray-400">
-                  No lenders match your request. Try a different amount or check back later.
-                </p>
+              <div className="p-10 text-center bg-[#14171C] border border-[#2A2D33] rounded-[4px] text-xs font-mono text-[#6B7280]">
+                NO ACTIVE LENDERS MATCH REQUEST CRITERIA. ADJUST PRINCIPAL OR CHECK AGAIN LATER.
               </div>
             )}
-          </>
+          </div>
         )}
 
         {!searchSubmitted && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center">
-            <Search className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-bold mb-2">Find Your Perfect Loan</h3>
-            <p className="text-gray-400">
-              Enter a loan amount above to see matching lenders
-            </p>
+          <div className="p-10 text-center bg-[#14171C] border border-[#2A2D33] rounded-[4px] text-xs font-mono text-[#6B7280]">
+            ENTER A LOAN PRINCIPAL TO SCAN AVAILABLE PRE-FUNDED SMART CONTRACT POOLS.
           </div>
         )}
 
@@ -917,3 +714,4 @@ export default function LoanMarketplace() {
     </div>
   );
 }
+

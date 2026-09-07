@@ -1,13 +1,17 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import Link from "next/link";
-import { useAuth } from "@/contexts/AuthContext";
-import { Shield, User, CheckCircle, XCircle, AlertCircle } from "lucide-react";
-import Tier2Verification from "@/components/auth/Tier2Verification";
-import Tier3Verification from "@/components/auth/Tier3Verification";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { Shield, User, CheckCircle2, XCircle, AlertCircle, ArrowUpRight, ChevronRight, Loader2 } from 'lucide-react';
+import Tier2Verification from '@/components/auth/Tier2Verification';
+import Tier3Verification from '@/components/auth/Tier3Verification';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import TerminalPanel from '@/components/ui/TerminalPanel';
+import StatusBadge from '@/components/ui/StatusBadge';
+import TerminalButton from '@/components/ui/TerminalButton';
+import DataRow from '@/components/ui/DataRow';
 
 function DashboardContent() {
   const { user, tierStatus, role, loading, refreshTierStatus } = useAuth();
@@ -21,171 +25,204 @@ function DashboardContent() {
 
   if (loading || !tierStatus) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading your dashboard...</p>
+      <div className="min-h-screen bg-[#0E1013] text-[#F5F3EE] flex items-center justify-center font-sans">
+        <div className="text-center space-y-3">
+          <Loader2 className="w-8 h-8 text-[#C9A24B] animate-spin mx-auto" />
+          <p className="text-xs font-mono text-[#6B7280]">ESTABLISHING PROTOCOL SESSION...</p>
         </div>
       </div>
     );
   }
 
-  const getTierBadgeColor = (tier) => {
-    const colors = {
-      1: 'bg-blue-500/10 border-blue-500/20 text-blue-500',
-      2: 'bg-purple-500/10 border-purple-500/20 text-purple-500',
-      3: 'bg-green-500/10 border-green-500/20 text-green-500',
-    };
-    return colors[tier] || colors[1];
+  const getTierVariant = (tier) => {
+    switch (tier) {
+      case 3: return 'signal';
+      case 2: return 'brass';
+      default: return 'neutral';
+    }
   };
 
   const getTierName = (tier) => {
-    const names = { 1: 'Basic', 2: 'ENS Verified', 3: 'Passport Verified' };
+    const names = { 1: 'Basic (Unverified)', 2: 'ENS Validated', 3: 'Gitcoin Passport Verified' };
     return names[tier] || 'Basic';
   };
 
   return (
-    <div className="min-h-screen bg-black text-white py-12 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-[#0E1013] text-[#F5F3EE] pt-24 pb-16 px-4 md:px-6 font-sans">
+      <div className="max-w-6xl mx-auto space-y-6">
+        
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Welcome back, {user.username}!</h1>
-          <p className="text-gray-400">
-            {role && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-500/10 border border-blue-500/20 text-blue-400 mr-2">
-                {role.charAt(0).toUpperCase() + role.slice(1)}
+        <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-[#2A2D33] pb-4 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono text-[#6B7280] tracking-wider uppercase">
+                CREDENTIAL PROTOCOL // ACCOUNT TELEMETRY
               </span>
-            )}
-            Manage your Credloom account and tier status
-          </p>
+              <StatusBadge variant="signal" label="NODE LINKED" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#F5F3EE]">
+              Identity & Protocol Status: {user.username}
+            </h1>
+            <p className="text-xs text-[#6B7280] font-mono mt-1">
+              ROLE ASSIGNMENT: {role ? role.toUpperCase() : 'STANDARD'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link href={`/${role || 'borrower'}`}>
+              <TerminalButton variant="brass" size="sm">
+                Open {role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Role'} Terminal
+                <ChevronRight className="w-3.5 h-3.5" />
+              </TerminalButton>
+            </Link>
+          </div>
         </div>
 
-        {/* Tier Status Card */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-zinc-800 rounded-lg">
-                <Shield className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">Your Account Status</h2>
-                <p className="text-gray-400">Account information and verification status</p>
-              </div>
+        {/* Account Identity Spec */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <TerminalPanel subheader="ACCOUNT HANDLE">
+            <div className="text-lg font-mono font-bold text-[#F5F3EE] mt-1">
+              {tierStatus.username}
             </div>
-            {tierStatus.tier && (
-              <div className={`px-4 py-2 rounded-lg border ${getTierBadgeColor(tierStatus.tier)}`}>
-                <span className="font-semibold">Tier {tierStatus.tier}: {getTierName(tierStatus.tier)}</span>
-              </div>
-            )}
-          </div>
+            <p className="text-[10px] text-[#6B7280] font-mono mt-1">
+              Authenticated Credloom Identity
+            </p>
+          </TerminalPanel>
 
-          {/* User Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div className="bg-black border border-zinc-800 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <User className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-400">Username</span>
-              </div>
-              <p className="text-lg font-semibold">{tierStatus.username}</p>
+          <TerminalPanel subheader="ETH WALLET IDENTIFIER">
+            <div className="text-sm font-mono font-semibold text-[#C9A24B] mt-1 break-all">
+              {tierStatus.wallet}
             </div>
-            <div className="bg-black border border-zinc-800 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Shield className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-400">Wallet Address</span>
-              </div>
-              <p className="text-lg font-mono text-sm">{tierStatus.wallet}</p>
-            </div>
-          </div>
+            <p className="text-[10px] text-[#6B7280] font-mono mt-1">
+              On-chain settlement address
+            </p>
+          </TerminalPanel>
 
-          {/* Tier 2 Status - Only for borrowers */}
-          {role === 'borrower' && tierStatus.tier && (
-            <div className="bg-black border border-zinc-800 rounded-lg p-4 mb-4">
-              <div className="flex items-center justify-between">
+          <TerminalPanel subheader="VERIFICATION LEVEL">
+            <div className="flex items-center gap-2 mt-1">
+              <StatusBadge variant={getTierVariant(tierStatus.tier)} label={`TIER ${tierStatus.tier || 1}`} />
+              <span className="text-xs font-mono text-[#F5F3EE]">
+                {getTierName(tierStatus.tier)}
+              </span>
+            </div>
+            <p className="text-[10px] text-[#6B7280] font-mono mt-2">
+              Unlocks collateral-free borrowing discounts
+            </p>
+          </TerminalPanel>
+        </div>
+
+        {/* Verification Checkpoints (For Borrowers) */}
+        {role === 'borrower' && tierStatus.tier && (
+          <TerminalPanel title="Protocol Verification Stepper" subheader="PROOF REQUIREMENTS">
+            <div className="divide-y divide-[#2A2D33] mt-2 text-xs font-mono">
+              <div className="py-3 flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold mb-1">Tier 2: ENS Verification</h3>
-                  <p className="text-sm text-gray-400">
+                  <span className="text-sm font-semibold text-[#F5F3EE] block">
+                    Tier 2: ENS Domain Resolution
+                  </span>
+                  <span className="text-[#6B7280] text-[11px]">
                     {tierStatus.tier2?.ens_verified 
-                      ? `Verified with ENS: ${tierStatus.tier2.ens_name}`
-                      : 'Not verified - verify to unlock better loan terms'}
-                  </p>
+                      ? `Verified ENS Name: ${tierStatus.tier2.ens_name}`
+                      : 'Resolves web3 domain identity to reduce fraud weight.'}
+                  </span>
                 </div>
                 {tierStatus.tier2?.ens_verified ? (
-                  <CheckCircle className="w-6 h-6 text-green-500" />
+                  <StatusBadge variant="signal" label="CONFIRMED" />
                 ) : (
-                  <XCircle className="w-6 h-6 text-gray-600" />
+                  <StatusBadge variant="brick" label="NOT ATTEMPTED" />
                 )}
               </div>
-            </div>
-          )}
 
-          {/* Tier 3 Status - Only for borrowers */}
-          {role === 'borrower' && tierStatus.tier && (
-            <div className="bg-black border border-zinc-800 rounded-lg p-4">
-              <div className="flex items-center justify-between">
+              <div className="py-3 flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold mb-1">Tier 3: Passport Verification</h3>
-                  <p className="text-sm text-gray-400">
+                  <span className="text-sm font-semibold text-[#F5F3EE] block">
+                    Tier 3: Gitcoin Passport Sybil Defense
+                  </span>
+                  <span className="text-[#6B7280] text-[11px]">
                     {tierStatus.tier3?.passport_verified === true 
-                      ? `Verified (Score: ${tierStatus.tier3.score})`
+                      ? `Passport Verified (Score: ${tierStatus.tier3.score})`
                       : tierStatus.tier3?.passport_verified === false
-                      ? `Not verified (Score: ${tierStatus.tier3.score} / Threshold: ${tierStatus.tier3.threshold})`
-                      : 'Not attempted - verify for best rates'}
-                  </p>
+                      ? `Score: ${tierStatus.tier3.score} / Threshold: ${tierStatus.tier3.threshold}`
+                      : 'Requires Tier 2 ENS domain proof prior to verification.'}
+                  </span>
                 </div>
                 {tierStatus.tier3?.passport_verified === true ? (
-                  <CheckCircle className="w-6 h-6 text-green-500" />
+                  <StatusBadge variant="signal" label="VERIFIED" />
                 ) : tierStatus.tier3?.passport_verified === false ? (
-                  <AlertCircle className="w-6 h-6 text-yellow-500" />
+                  <StatusBadge variant="brass" label="BELOW THRESHOLD" />
                 ) : (
-                  <XCircle className="w-6 h-6 text-gray-600" />
+                  <StatusBadge variant="neutral" label="LOCKED" />
                 )}
               </div>
             </div>
-          )}
-        </div>
+          </TerminalPanel>
+        )}
 
-        {/* Verification Forms - Only for borrowers with tier system */}
+        {/* Verification Submission Modules */}
         {role === 'borrower' && tierStatus.tier && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Tier 2 Verification - Only for borrowers */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {!tierStatus.tier2?.ens_verified && (
               <Tier2Verification />
             )}
-            
-            {/* Tier 3 Verification - Only for borrowers (requires Tier 2 first) */}
             {tierStatus.tier2?.ens_verified && (
               <Tier3Verification />
             )}
           </div>
         )}
 
-        {/* Quick Links */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-          <h2 className="text-xl font-bold mb-4">Quick Links</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Role Portal Dispatch Links */}
+        <TerminalPanel title="Protocol Operations" subheader="SELECT ROLE CONSOLE">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
             <Link
               href="/borrower"
-              className="p-4 bg-black hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors"
+              className="p-4 bg-[#0E1013] border border-[#2A2D33] hover:border-[#C9A24B] rounded-[4px] transition-colors group block"
             >
-              <h3 className="font-semibold mb-1">Borrower Dashboard</h3>
-              <p className="text-sm text-gray-400">View and manage loans</p>
+              <div className="flex justify-between items-center text-xs font-mono text-[#6B7280] mb-1">
+                <span>ROLE // 01</span>
+                <ChevronRight className="w-3.5 h-3.5 text-[#6B7280] group-hover:text-[#C9A24B] transition-colors" />
+              </div>
+              <h3 className="text-sm font-semibold text-[#F5F3EE] group-hover:text-[#C9A24B] transition-colors">
+                Borrower Terminal
+              </h3>
+              <p className="text-[11px] text-[#6B7280] font-mono mt-1">
+                Credit evaluation, borrowing, repayment & capacity.
+              </p>
             </Link>
+
             <Link
               href="/lender"
-              className="p-4 bg-black hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors"
+              className="p-4 bg-[#0E1013] border border-[#2A2D33] hover:border-[#C9A24B] rounded-[4px] transition-colors group block"
             >
-              <h3 className="font-semibold mb-1">Lender Dashboard</h3>
-              <p className="text-sm text-gray-400">Manage lending portfolio</p>
+              <div className="flex justify-between items-center text-xs font-mono text-[#6B7280] mb-1">
+                <span>ROLE // 02</span>
+                <ChevronRight className="w-3.5 h-3.5 text-[#6B7280] group-hover:text-[#C9A24B] transition-colors" />
+              </div>
+              <h3 className="text-sm font-semibold text-[#F5F3EE] group-hover:text-[#C9A24B] transition-colors">
+                Lender Terminal
+              </h3>
+              <p className="text-[11px] text-[#6B7280] font-mono mt-1">
+                Escrow management, risk parameters & yield telemetry.
+              </p>
             </Link>
+
             <Link
               href="/insurer"
-              className="p-4 bg-black hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors"
+              className="p-4 bg-[#0E1013] border border-[#2A2D33] hover:border-[#C9A24B] rounded-[4px] transition-colors group block"
             >
-              <h3 className="font-semibold mb-1">Insurer Dashboard</h3>
-              <p className="text-sm text-gray-400">Manage insurance coverage</p>
+              <div className="flex justify-between items-center text-xs font-mono text-[#6B7280] mb-1">
+                <span>ROLE // 03</span>
+                <ChevronRight className="w-3.5 h-3.5 text-[#6B7280] group-hover:text-[#C9A24B] transition-colors" />
+              </div>
+              <h3 className="text-sm font-semibold text-[#F5F3EE] group-hover:text-[#C9A24B] transition-colors">
+                Insurer Terminal
+              </h3>
+              <p className="text-[11px] text-[#6B7280] font-mono mt-1">
+                Underwriting capital, claims queue & 100 bps fee ingestion.
+              </p>
             </Link>
           </div>
-        </div>
+        </TerminalPanel>
+
       </div>
     </div>
   );

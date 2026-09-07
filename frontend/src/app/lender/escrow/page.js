@@ -1,16 +1,21 @@
-'use client'
+'use client';
 import { useState } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft,
   Wallet,
   AlertCircle,
-  CheckCircle,
+  CheckCircle2,
   Calendar,
   Coins,
-  ExternalLink
+  ExternalLink,
+  Loader2,
+  ShieldCheck
 } from 'lucide-react';
 import { createLoanOffer, isValidEthAddress, formatTxHash } from '@/lib/api/blockchain';
+import TerminalPanel from '@/components/ui/TerminalPanel';
+import TerminalButton from '@/components/ui/TerminalButton';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 export default function EscrowFunding() {
   const [formData, setFormData] = useState({
@@ -24,7 +29,6 @@ export default function EscrowFunding() {
   const [txHash, setTxHash] = useState(null);
   const [offerId, setOfferId] = useState(null);
   const [errors, setErrors] = useState({});
-  const [focusedField, setFocusedField] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
   const validateForm = () => {
@@ -45,7 +49,7 @@ export default function EscrowFunding() {
     if (!formData.lenderAddress) {
       newErrors.lenderAddress = 'Please enter a valid lender address';
     } else if (!isValidEthAddress(formData.lenderAddress)) {
-      newErrors.lenderAddress = 'Invalid Ethereum address format (must be 0x followed by 40 hex characters)';
+      newErrors.lenderAddress = 'Invalid Ethereum address format (0x + 40 hex characters)';
     }
 
     setErrors(newErrors);
@@ -61,7 +65,6 @@ export default function EscrowFunding() {
     setErrorMessage(null);
 
     try {
-      // Call blockchain API to create loan offer
       const result = await createLoanOffer({
         lenderAddress: formData.lenderAddress,
         amountEth: parseFloat(formData.amount),
@@ -69,14 +72,10 @@ export default function EscrowFunding() {
         minCreditScore: parseInt(formData.creditScore)
       });
 
-      console.log('[Escrow] Loan offer created:', result);
-      
-      // Store transaction details
       setTxHash(result.txHash);
       setOfferId(result.offerId);
       setTransactionStatus('confirmed');
       
-      // Reset form after 3 seconds
       setTimeout(() => {
         setTransactionStatus(null);
         setTxHash(null);
@@ -89,11 +88,9 @@ export default function EscrowFunding() {
         });
       }, 5000);
     } catch (error) {
-      console.error('[Escrow] Error creating loan offer:', error);
       setErrorMessage(error.message || 'Failed to create loan offer');
       setTransactionStatus('error');
       
-      // Reset error state after 5 seconds
       setTimeout(() => {
         setTransactionStatus(null);
         setErrorMessage(null);
@@ -114,161 +111,180 @@ export default function EscrowFunding() {
     }
   };
 
-  // Transaction Status Modal
   if (transactionStatus === 'pending' || transactionStatus === 'confirmed' || transactionStatus === 'error') {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-12 px-4 flex items-center justify-center">
-        <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-10 text-center">
-          {transactionStatus === 'pending' && (
-            <>
-              <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-              <h2 className="text-3xl font-bold mb-3">Creating Offer</h2>
-              <p className="text-gray-400">Creating your loan offer on the blockchain...</p>
-              <p className="text-sm text-gray-500 mt-2">This may take a few seconds</p>
-            </>
-          )}
-          
-          {transactionStatus === 'confirmed' && (
-            <>
-              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-12 h-12 text-white" strokeWidth={3} />
-              </div>
-              <h2 className="text-3xl font-bold mb-3">Success!</h2>
-              <p className="text-gray-400 mb-6">Your loan offer has been created on the blockchain.</p>
-              
-              {offerId && (
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4 mb-4">
-                  <p className="text-xs text-gray-400 mb-1">Offer ID</p>
-                  <p className="text-xl font-bold text-green-400">#{offerId}</p>
-                </div>
+      <div className="min-h-screen bg-[#0E1013] text-[#F5F3EE] pt-24 pb-16 px-4 flex items-center justify-center font-sans">
+        <div className="max-w-md w-full">
+          <TerminalPanel variant={transactionStatus === 'confirmed' ? 'signal' : transactionStatus === 'error' ? 'brick' : 'default'}>
+            <div className="text-center py-6">
+              {transactionStatus === 'pending' && (
+                <>
+                  <Loader2 className="w-8 h-8 text-[#C9A24B] animate-spin mx-auto mb-4" />
+                  <h2 className="text-lg font-bold font-mono text-[#F5F3EE] mb-1">
+                    TRANSACTION IN FLIGHT
+                  </h2>
+                  <p className="text-xs text-[#6B7280] font-mono">
+                    Broadcasting escrow commitment to smart contract pool...
+                  </p>
+                </>
               )}
-              
-              {txHash && (
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                  <p className="text-xs text-gray-400 mb-2">Transaction Hash</p>
-                  <div className="flex items-center justify-center gap-2">
-                    <code className="text-sm text-gray-300 font-mono">{formatTxHash(txHash, 8)}</code>
-                    <button
-                      onClick={() => window.open(`https://etherscan.io/tx/${txHash}`, '_blank')}
-                      className="text-blue-400 hover:text-blue-300 transition-colors"
-                      title="View on Etherscan"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+
+              {transactionStatus === 'confirmed' && (
+                <>
+                  <CheckCircle2 className="w-8 h-8 text-[#1B7A5A] mx-auto mb-4" />
+                  <h2 className="text-lg font-bold font-mono text-[#1B7A5A] mb-1">
+                    ESCROW DEPOSIT CONFIRMED
+                  </h2>
+                  <p className="text-xs text-[#6B7280] font-mono mb-4">
+                    Loan offer registered on-chain with assigned identifier.
+                  </p>
+                  
+                  {offerId && (
+                    <div className="p-3 bg-[#0E1013] border border-[#2A2D33] rounded-[4px] mb-3 text-left">
+                      <span className="text-[10px] font-mono text-[#6B7280] block">OFFER IDENTIFIER</span>
+                      <span className="text-sm font-mono font-bold text-[#1B7A5A]">#{offerId}</span>
+                    </div>
+                  )}
+
+                  {txHash && (
+                    <div className="p-3 bg-[#0E1013] border border-[#2A2D33] rounded-[4px] text-left">
+                      <span className="text-[10px] font-mono text-[#6B7280] block">TX HASH</span>
+                      <div className="flex items-center justify-between mt-1">
+                        <code className="text-xs font-mono text-[#F5F3EE]">{formatTxHash(txHash, 10)}</code>
+                        <a
+                          href={`https://etherscan.io/tx/${txHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#C9A24B] hover:text-[#F5F3EE] transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-[10px] text-[#6B7280] font-mono mt-4">Resetting session view in 5 seconds...</p>
+                </>
               )}
-              
-              <p className="text-xs text-gray-500 mt-6">Redirecting to dashboard...</p>
-            </>
-          )}
-          
-          {transactionStatus === 'error' && (
-            <>
-              <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertCircle className="w-12 h-12 text-white" strokeWidth={3} />
-              </div>
-              <h2 className="text-3xl font-bold mb-3">Error</h2>
-              <p className="text-gray-400 mb-4">Failed to create loan offer</p>
-              {errorMessage && (
-                <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-red-400">{errorMessage}</p>
-                </div>
+
+              {transactionStatus === 'error' && (
+                <>
+                  <AlertCircle className="w-8 h-8 text-[#B23B3B] mx-auto mb-4" />
+                  <h2 className="text-lg font-bold font-mono text-[#B23B3B] mb-1">
+                    EXECUTION REVERTED
+                  </h2>
+                  <p className="text-xs text-[#6B7280] font-mono mb-3">
+                    {errorMessage || 'Escrow initialization failed on network layer.'}
+                  </p>
+                  <p className="text-[10px] text-[#6B7280] font-mono">Retrying in 5 seconds...</p>
+                </>
               )}
-              <p className="text-xs text-gray-500">Please try again...</p>
-            </>
-          )}
+            </div>
+          </TerminalPanel>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-16 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#0E1013] text-[#F5F3EE] pt-24 pb-16 px-4 md:px-6 font-sans">
+      <div className="max-w-2xl mx-auto space-y-6">
+        
+        {/* Navigation */}
         <Link
           href="/lender"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8"
+          className="inline-flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#F5F3EE] font-mono transition-colors"
         >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Dashboard
+          <ArrowLeft className="w-4 h-4" />
+          RETURN TO LENDER TERMINAL
         </Link>
 
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Escrow Configuration</h1>
-          <p className="text-gray-400">Configure your escrow parameters</p>
+        {/* Header */}
+        <div className="border-b border-[#2A2D33] pb-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-mono text-[#6B7280] tracking-wider uppercase">
+              ESCROW CAPITAL VAULT // POOL CONTRACT
+            </span>
+            <StatusBadge variant="signal" label="READY" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#F5F3EE]">
+            Escrow Provisioning
+          </h1>
+          <p className="text-xs text-[#6B7280] mt-1">
+            Lock capital in the smart contract escrow to automatically fund matching borrower loans.
+          </p>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8">
-          <div className="space-y-8">
-            {/* Amount Field */}
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                <div className="flex items-center gap-2">
-                  <Coins className="w-4 h-4" />
-                  Amount (ETH)
-                </div>
+        {/* Main Panel */}
+        <TerminalPanel title="Escrow Allocation Spec" subheader="CAPITAL COMMITMENT CONFIG">
+          <div className="space-y-4 mt-3">
+            
+            {/* Amount */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-mono text-[#6B7280]">
+                AMOUNT (ETH)
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">Ξ</span>
                 <input
                   type="number"
+                  step="0.01"
                   value={formData.amount}
                   onChange={(e) => handleInputChange('amount', e.target.value)}
                   placeholder="0.00"
-                  className="w-full pl-10 pr-4 py-3 bg-black border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-white transition-colors"
+                  className="w-full px-3 py-2 bg-[#0E1013] border border-[#2A2D33] focus:border-[#C9A24B] rounded-[4px] text-xs font-mono text-[#F5F3EE] outline-none transition-colors"
                 />
+                <span className="absolute right-3 top-2.5 text-[11px] font-mono text-[#6B7280]">
+                  ETH
+                </span>
               </div>
               {errors.amount && (
-                <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+                <p className="text-[11px] text-[#B23B3B] font-mono flex items-center gap-1 mt-1">
                   <AlertCircle className="w-3 h-3" />
                   {errors.amount}
                 </p>
               )}
-              <div className="flex gap-2 mt-3">
-                {['1000', '5000', '10000'].map((preset) => (
+              <div className="flex gap-2 pt-1">
+                {['1', '5', '10'].map((preset) => (
                   <button
                     key={preset}
+                    type="button"
                     onClick={() => handleInputChange('amount', preset)}
-                    className="px-3 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm hover:bg-zinc-700 hover:border-white transition-colors"
+                    className="px-2.5 py-1 bg-[#0E1013] border border-[#2A2D33] hover:border-[#C9A24B] rounded-[4px] text-[10px] font-mono text-[#6B7280] hover:text-[#F5F3EE] transition-colors"
                   >
-                    Ξ{parseInt(preset).toLocaleString()}
+                    Ξ{preset} ETH
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Duration Field */}
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Duration (Days)
-                </div>
+            {/* Duration */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-mono text-[#6B7280]">
+                DURATION (DAYS)
               </label>
               <input
                 type="number"
                 value={formData.duration}
                 onChange={(e) => handleInputChange('duration', e.target.value)}
                 placeholder="30"
-                className="w-full px-4 py-3 bg-black border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-white transition-colors"
+                className="w-full px-3 py-2 bg-[#0E1013] border border-[#2A2D33] focus:border-[#C9A24B] rounded-[4px] text-xs font-mono text-[#F5F3EE] outline-none transition-colors"
               />
               {errors.duration && (
-                <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+                <p className="text-[11px] text-[#B23B3B] font-mono flex items-center gap-1 mt-1">
                   <AlertCircle className="w-3 h-3" />
                   {errors.duration}
                 </p>
               )}
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-2 pt-1">
                 {[
-                  { value: '30', label: '30 days' },
-                  { value: '60', label: '60 days' },
-                  { value: '90', label: '90 days' }
+                  { value: '30', label: '30 Days' },
+                  { value: '60', label: '60 Days' },
+                  { value: '90', label: '90 Days' }
                 ].map((preset) => (
                   <button
                     key={preset.value}
+                    type="button"
                     onClick={() => handleInputChange('duration', preset.value)}
-                    className="px-3 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm hover:bg-zinc-700 hover:border-white transition-colors"
+                    className="px-2.5 py-1 bg-[#0E1013] border border-[#2A2D33] hover:border-[#C9A24B] rounded-[4px] text-[10px] font-mono text-[#6B7280] hover:text-[#F5F3EE] transition-colors"
                   >
                     {preset.label}
                   </button>
@@ -276,67 +292,69 @@ export default function EscrowFunding() {
               </div>
             </div>
 
-            {/* Credit Score Field */}
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">Credit Score</label>
+            {/* Credit Score */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-mono text-[#6B7280]">
+                MINIMUM CREDIT SCORE
+              </label>
               <input
                 type="number"
+                min="0"
+                max="850"
                 value={formData.creditScore}
                 onChange={(e) => handleInputChange('creditScore', e.target.value)}
                 placeholder="750"
-                min="0"
-                max="850"
-                className="w-full px-4 py-3 bg-black border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-white transition-colors"
+                className="w-full px-3 py-2 bg-[#0E1013] border border-[#2A2D33] focus:border-[#C9A24B] rounded-[4px] text-xs font-mono text-[#F5F3EE] outline-none transition-colors"
               />
               {errors.creditScore && (
-                <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+                <p className="text-[11px] text-[#B23B3B] font-mono flex items-center gap-1 mt-1">
                   <AlertCircle className="w-3 h-3" />
                   {errors.creditScore}
                 </p>
               )}
-              <p className="text-xs text-gray-500 mt-2">Score must be between 0 and 850</p>
+              <p className="text-[10px] text-[#6B7280] font-mono">
+                Threshold bound to GBR risk model verification.
+              </p>
             </div>
 
-            {/* Lender Address Field */}
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                <div className="flex items-center gap-2">
-                  <Wallet className="w-4 h-4" />
-                  Lender Wallet Address
-                </div>
+            {/* Lender Wallet Address */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-mono text-[#6B7280]">
+                LENDER ETHEREUM ADDRESS
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={formData.lenderAddress}
-                  onChange={(e) => handleInputChange('lenderAddress', e.target.value)}
-                  placeholder="0x..."
-                  className="w-full px-4 py-3 bg-black border border-zinc-800 rounded-lg text-white font-mono text-sm focus:outline-none focus:border-white transition-colors"
-                />
-                {formData.lenderAddress && formData.lenderAddress.length >= 10 && (
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <CheckCircle className="w-5 h-5 text-white" />
-                  </div>
-                )}
-              </div>
+              <input
+                type="text"
+                value={formData.lenderAddress}
+                onChange={(e) => handleInputChange('lenderAddress', e.target.value)}
+                placeholder="0x..."
+                className="w-full px-3 py-2 bg-[#0E1013] border border-[#2A2D33] focus:border-[#C9A24B] rounded-[4px] text-xs font-mono text-[#F5F3EE] outline-none transition-colors"
+              />
               {errors.lenderAddress && (
-                <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+                <p className="text-[11px] text-[#B23B3B] font-mono flex items-center gap-1 mt-1">
                   <AlertCircle className="w-3 h-3" />
                   {errors.lenderAddress}
                 </p>
               )}
             </div>
 
-            {/* Submit Button */}
-            <button
-              onClick={handleSubmit}
-              disabled={!formData.amount || !formData.duration || !formData.creditScore || !formData.lenderAddress}
-              className="w-full px-6 py-4 bg-white text-black rounded-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Configure Escrow
-            </button>
+            {/* Action */}
+            <div className="pt-2">
+              <TerminalButton
+                type="button"
+                variant="brass"
+                size="lg"
+                fullWidth
+                onClick={handleSubmit}
+                disabled={!formData.amount || !formData.duration || !formData.creditScore || !formData.lenderAddress}
+              >
+                <Coins className="w-4 h-4" />
+                Commit Capital To Escrow Contract
+              </TerminalButton>
+            </div>
+
           </div>
-        </div>
+        </TerminalPanel>
+
       </div>
     </div>
   );

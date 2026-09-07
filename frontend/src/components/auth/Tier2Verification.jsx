@@ -1,16 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from 'react';
-import { Shield, Check, X, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState } from "react";
+import { Shield, Check, X, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import TerminalButton from "@/components/ui/TerminalButton";
+import StatusBadge from "@/components/ui/StatusBadge";
 
-/**
- * Tier 2 Verification Component
- * Allows users to verify their ENS name to upgrade to Tier 2
- */
 export default function Tier2Verification() {
   const { verifyTier2, tierStatus } = useAuth();
-  const [ensName, setEnsName] = useState('');
+  const [ensName, setEnsName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -19,9 +17,8 @@ export default function Tier2Verification() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!ensName.trim()) {
-      setError('Please enter an ENS name');
+      setError("Please enter an ENS domain name");
       return;
     }
 
@@ -31,14 +28,13 @@ export default function Tier2Verification() {
 
     try {
       const response = await verifyTier2(ensName);
-      
       if (response.success) {
         setResult(response.data);
       } else {
         setError(response.error);
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -46,43 +42,41 @@ export default function Tier2Verification() {
 
   if (isAlreadyVerified) {
     return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-green-500/10 rounded-lg">
-            <Check className="w-6 h-6 text-green-500" />
+      <div className="bg-[#14171C] border border-[#2A2D33] rounded-[4px] p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-[4px] bg-[#1B7A5A]/15 border border-[#1B7A5A]/40 flex items-center justify-center">
+              <Check className="w-4 h-4 text-[#2ecc71]" />
+            </div>
+            <div>
+              <div className="text-xs font-mono text-[#F5F3EE]">TIER 2 ENS PROOF VERIFIED</div>
+              <div className="text-xs font-mono text-[#6B7280]">
+                DOMAIN: {tierStatus.tier2.ens_name}
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold">Tier 2 Verified</h3>
-            <p className="text-sm text-gray-400">
-              ENS: {tierStatus.tier2.ens_name}
-            </p>
-          </div>
+          <StatusBadge variant="signal">TIER 2 ACTIVE</StatusBadge>
         </div>
-        <p className="text-gray-400 text-sm">
-          You have successfully verified your Tier 2 status with ENS.
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-zinc-800 rounded-lg">
-          <Shield className="w-6 h-6 text-white" />
+    <div className="bg-[#14171C] border border-[#2A2D33] rounded-[4px] p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <Shield className="w-4 h-4 text-[#C9A24B]" />
+          <span className="text-xs font-mono text-[#F5F3EE] uppercase tracking-wider">
+            Tier 2 ENS Resolution
+          </span>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold">Tier 2 Verification</h3>
-          <p className="text-sm text-gray-400">
-            Verify your ENS name to upgrade to Tier 2
-          </p>
-        </div>
+        <StatusBadge variant="brass">UPGRADE READY</StatusBadge>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label htmlFor="ensName" className="block text-sm font-medium text-gray-300 mb-2">
-            ENS Name
+          <label htmlFor="ensName" className="block text-xs font-mono text-[#6B7280] uppercase mb-1">
+            Ethereum Name Service Domain (.eth)
           </label>
           <input
             type="text"
@@ -92,69 +86,49 @@ export default function Tier2Verification() {
               setEnsName(e.target.value);
               setError(null);
             }}
-            className="w-full px-4 py-3 bg-black border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+            className="w-full px-3 py-2 text-xs font-mono bg-[#0E1013] border border-[#2A2D33] rounded-[4px] text-[#F5F3EE] placeholder-[#4B5262] focus:outline-none focus:border-[#C9A24B]"
             placeholder="vitalik.eth"
             disabled={isLoading}
           />
           {error && (
-            <p className="mt-2 text-sm text-red-500 flex items-center gap-1">
-              <X className="w-4 h-4" />
+            <p className="mt-1 text-[11px] font-mono text-[#e74c3c] flex items-center gap-1">
+              <X className="w-3.5 h-3.5" />
               {error}
             </p>
           )}
         </div>
 
         {result && (
-          <div className={`p-4 rounded-lg border ${
+          <div className={`p-3 rounded-[4px] border ${
             result.verified 
-              ? 'bg-green-500/10 border-green-500/20' 
-              : 'bg-red-500/10 border-red-500/20'
+              ? "bg-[#1B7A5A]/10 border-[#1B7A5A]/40 text-[#2ecc71]" 
+              : "bg-[#B23B3B]/10 border-[#B23B3B]/40 text-[#e74c3c]"
           }`}>
-            <div className="flex items-center gap-2 mb-2">
-              {result.verified ? (
-                <Check className="w-5 h-5 text-green-500" />
-              ) : (
-                <X className="w-5 h-5 text-red-500" />
-              )}
-              <span className={`font-semibold ${
-                result.verified ? 'text-green-500' : 'text-red-500'
-              }`}>
-                {result.verified ? 'Verification Successful!' : 'Verification Failed'}
-              </span>
-            </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-xs font-mono">
               {result.verified 
-                ? `Your ENS name "${result.ens_name}" has been verified.`
-                : 'The ENS name could not be verified. Please try again with a valid ENS name.'}
+                ? `SUCCESS: ENS domain "${result.ens_name}" verified.` 
+                : "FAILED: ENS resolution check failed. Verify domain ownership."}
             </p>
           </div>
         )}
 
-        <button
+        <TerminalButton
           type="submit"
           disabled={isLoading || !ensName.trim()}
-          className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:bg-zinc-200 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="brass"
+          size="sm"
+          fullWidth
         >
           {isLoading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Verifying...
-            </>
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              Querying ENS Records...
+            </span>
           ) : (
-            <>
-              Verify ENS
-              <Shield className="w-5 h-5" />
-            </>
+            "Verify ENS Domain"
           )}
-        </button>
+        </TerminalButton>
       </form>
-
-      <div className="mt-4 p-3 bg-zinc-800/50 rounded-lg">
-        <p className="text-xs text-gray-400">
-          <strong className="text-white">Note:</strong> Any non-empty string will be accepted for testing purposes. 
-          In production, this would verify against the actual ENS registry.
-        </p>
-      </div>
     </div>
   );
 }
