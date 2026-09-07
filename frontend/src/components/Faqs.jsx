@@ -45,7 +45,7 @@ export default function Faqs() {
   };
 
   return (
-    <section className="py-16 lg:py-24 bg-[#0E1013] border-b border-[#2A2D33]">
+    <section className="py-16 lg:py-24 bg-transparent border-b border-[#2A2D33] relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Header */}
