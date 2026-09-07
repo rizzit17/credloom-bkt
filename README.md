@@ -36,3 +36,4 @@ JSON output: {"ai_risk_score":654,"risk_raw":0.3454290484630654}
 _Remaining Transactions can be fetched using the mentioned endpoints in_ **blochain-service**
 
 #### Frontend Output Screenshots:
+"# credloom-bkt" 
